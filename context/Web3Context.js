@@ -13,6 +13,7 @@ const validNetworkOptions = {
 };
 
 function Web3ContextProvider({ children }) {
+	const toast = createStandaloneToast();
 	const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(null);
 	const [connectingAccount, setConnectingAccount] = useState(null);
 	const [account, setAccount] = useState(null);
@@ -20,7 +21,8 @@ function Web3ContextProvider({ children }) {
 	const [wallet, setWallet] = useState(null);
 
 	useEffect(() => {
-		if (isMetamaskInstalled !== undefined) {
+		if (window.ethereum !== undefined) {
+			setIsMetamaskInstalled(true);
 			setWallet(new providers.Web3Provider(window.ethereum));
 
 			window.ethereum.on("chainChanged", (chainId) => {
@@ -30,6 +32,11 @@ function Web3ContextProvider({ children }) {
 			window.ethereum.on("accountsChanged", (accounts) => {
 				setAccount(accounts[0]);
 				setWallet(new providers.Web3Provider(window.ethereum));
+			});
+
+			window.ethereum.on("disconnect", (accounts) => {
+				setAccount(null);
+				setWallet(null);
 			});
 		} else {
 			setIsMetamaskInstalled(false);

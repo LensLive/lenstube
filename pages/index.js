@@ -11,6 +11,8 @@ import {
 	Text,
 	Image,
 } from "@chakra-ui/react";
+import MetamaskInstalledModal from "../components/MetamaskInstalledModal";
+import NetworkChangeModal from "../components/NetworkChangeModal";
 
 export default function Home() {
 	return (
@@ -24,7 +26,10 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			<VStack height="100vh" spacing="0">
+			<NetworkChangeModal />
+			<MetamaskInstalledModal />
+
+			<VStack overflow="hidden" height="100vh" spacing="0">
 				<Header />
 				<Grid templateColumns="1fr 4fr" width="100%" height="100%">
 					<Sidebar />
