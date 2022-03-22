@@ -3,7 +3,6 @@ import {
 	MenuButton,
 	MenuList,
 	MenuItem,
-	Link,
 	MenuGroup,
 	MenuDivider,
 	Image,
@@ -15,13 +14,30 @@ import { FiSettings } from "react-icons/fi";
 import { AiOutlineUser } from "react-icons/ai";
 import { ApolloContext } from "../context/ApolloContext";
 import { useContext } from "react";
+import Link from "next/link";
 
 export function ProfileMenu() {
-	const { profiles, currentProfile, setCurrentProfile } =
+	const { apolloContext, dispatch: apolloDispatch } =
 		useContext(ApolloContext);
+	const { profiles, currentProfile } = apolloContext;
+
 	return (
 		<Menu>
-			<MenuButton as={Button}>Profiles</MenuButton>
+			{profiles && currentProfile !== undefined ? (
+				<MenuButton
+					as={Button}
+					borderRadius="full"
+					w="10px"
+					overflow="hidden"
+					padding={0}
+				>
+					<Image
+						src={profiles[currentProfile].picture}
+						alt="pfp"
+						w="100%"
+					/>
+				</MenuButton>
+			) : null}
 			<MenuList>
 				<MenuItem>
 					<VStack
@@ -30,9 +46,9 @@ export function ProfileMenu() {
 						width="100%"
 					>
 						<Text>Logged in as </Text>
-						{currentProfile ? (
+						{profiles && currentProfile !== undefined ? (
 							<Text colorScheme="purple">
-								{currentProfile.handle}
+								{profiles[currentProfile].handle}
 							</Text>
 						) : (
 							<Text>loading...</Text>
@@ -41,26 +57,29 @@ export function ProfileMenu() {
 				</MenuItem>
 				<MenuDivider />
 				<MenuGroup title="Account">
-					<MenuItem icon={<AiOutlineUser />}>
-						<Link href="/settings">
+					<Link href="/profile">
+						<MenuItem icon={<AiOutlineUser />}>
 							<Text>Profile</Text>
-						</Link>
-					</MenuItem>
-					<MenuItem icon={<FiSettings />}>
-						<Link href="/settings">
+						</MenuItem>
+					</Link>
+					<Link href="/settings">
+						<MenuItem icon={<FiSettings />}>
 							<Text>Settings</Text>
-						</Link>
-					</MenuItem>
+						</MenuItem>
+					</Link>
 				</MenuGroup>
 				<MenuDivider />
 				<MenuGroup title="Switch Account">
 					<VStack as="ul" maxHeight="300px" overflowY="scroll">
 						{profiles
-							? profiles.map((profile) => {
+							? profiles.map((profile, index) => {
 									return (
 										<MenuItem
 											onClick={() =>
-												setCurrentProfile(profile)
+												apolloDispatch({
+													type: "CURRENT_PROFILE",
+													payload: index,
+												})
 											}
 											as="li"
 											key={profile.id}
@@ -69,7 +88,8 @@ export function ProfileMenu() {
 												w={5}
 												mr={3}
 												borderRadius="full"
-												src="https://bit.ly/dan-abramov"
+												alt="pfp"
+												src={profiles[index].picture}
 											/>
 											<span>{profile.handle}</span>
 										</MenuItem>

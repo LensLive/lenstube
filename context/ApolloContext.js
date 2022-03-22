@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useReducer } from "react";
 import {
 	ApolloClient,
 	InMemoryCache,
@@ -132,6 +132,148 @@ const GET_PROFILES = `
   }
 `;
 
+const UPDATE_PROFILE = `
+  mutation($request: UpdateProfileRequest!) { 
+    updateProfile(request: $request) {
+     id
+     id
+     name
+     bio
+     location
+     website
+     twitterUrl
+     picture {
+       ... on NftImage {
+         contractAddress
+         tokenId
+         uri
+         verified
+       }
+       ... on MediaSet {
+         original {
+           url
+           mimeType
+         }
+       }
+       __typename
+     }
+     handle
+     coverPicture {
+       ... on NftImage {
+         contractAddress
+         tokenId
+         uri
+         verified
+       }
+       ... on MediaSet {
+         original {
+           url
+           mimeType
+         }
+       }
+       __typename
+     }
+     ownedBy
+     depatcher {
+       address
+       canUseRelay
+     }
+     stats {
+       totalFollowers
+       totalFollowing
+       totalPosts
+       totalComments
+       totalMirrors
+       totalPublications
+       totalCollects
+     }
+     followModule {
+       ... on FeeFollowModuleSettings {
+         type
+         amount {
+           asset {
+             symbol
+             name
+             decimals
+             address
+           }
+           value
+         }
+         recipient
+       }
+       __typename
+     }
+    }
+ }
+`;
+
+const GET_USERS_NFTS = `
+  query($request: NFTsRequest!) {
+    nfts(request: $request) {
+      items {
+        contractName
+        contractAddress
+        symbol
+        tokenId
+        owners {
+          amount
+          address
+        }
+        name
+        description
+        contentURI
+        originalContent {
+          uri
+          metaType
+        }
+        chainId
+        collectionName
+        ercType
+      }
+    pageInfo {
+        prev
+        next
+        totalCount
+    }
+  }
+}
+`;
+
+const NFT_CHALLENGE = `
+  query($request: NftOwnershipChallengeRequest!) {
+    nftOwnershipChallenge(request: $request) { id, text }
+  }
+`;
+
+const CREATE_SET_PROFILE_IMAGE_URI_TYPED_DATA = `
+  mutation($request: UpdateProfileImageRequest!) { 
+    createSetProfileImageURITypedData(request: $request) {
+      id
+      expiresAt
+      typedData {
+        domain {
+          name
+          chainId
+          version
+          verifyingContract
+        }
+        types {
+          SetProfileImageURIWithSig {
+            name
+            type
+          }
+        }
+        value {
+          nonce
+            deadline
+            imageURI
+            profileId
+        }
+      }
+    }
+ }
+`;
+
 const prettyJSON = (message, obj) => {
 	console.log(message, JSON.stringify(obj, null, 2));
 };
@@ -140,10 +282,32 @@ const sleep = (milliseconds) => {
 	return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
+const apolloReducer = (state, action) => {
+	switch (action.type) {
+		case "SET_PROFILES":
+			return { profiles: action.payload };
+		case "SET_PROFILE":
+			console.log(action.payload);
+			let profile = action.payload;
+			let id = profile.id;
+			return {
+				...state,
+				profiles: state.profiles.map((profile) => {
+					if (profile.id == id) {
+						return action.payload;
+					} else return profile;
+				}),
+			};
+		case "CURRENT_PROFILE":
+			return { ...state, currentProfile: action.payload };
+		case "SET_NFTS":
+			return { ...state, nfts: action.payload };
+	}
+};
+
 function ApolloContextProvider({ children }) {
 	const { wallet, account } = useContext(Web3Context);
-	const [profiles, setProfiles] = useState([]);
-	const [currentProfile, setCurrentProfile] = useState(null);
+	const [apolloContext, dispatch] = useReducer(apolloReducer, {});
 
 	const apolloClient = new ApolloClient({
 		link: authLink.concat(httpLink),
@@ -156,12 +320,6 @@ function ApolloContextProvider({ children }) {
 			getProfiles();
 		}
 	}, [account]);
-
-	useEffect(() => {
-		if (profiles.length > 0) {
-			setCurrentProfile(profiles[0]);
-		}
-	}, [profiles]);
 
 	const generateChallenge = (address) => {
 		return apolloClient.query({
@@ -246,9 +404,84 @@ function ApolloContextProvider({ children }) {
 
 		const profilesFromProfileIds = await getProfilesRequest(request);
 
-		prettyJSON("profiles: result", profilesFromProfileIds.data);
-		setProfiles([...profilesFromProfileIds.data.profiles.items]);
-		console.log(profilesFromProfileIds.data);
+		dispatch({
+			type: "SET_PROFILES",
+			payload: [...profilesFromProfileIds.data.profiles.items],
+		});
+		dispatch({ type: "CURRENT_PROFILE", payload: 0 });
+	}
+
+	async function updateProfile(profileInfo) {
+		await login(account);
+
+		return apolloClient.mutate({
+			mutation: gql(UPDATE_PROFILE),
+			variables: {
+				request: profileInfo,
+			},
+		});
+	}
+
+	async function getUsersNfts(contractAddress) {
+		await login(account);
+		return apolloClient.query({
+			query: gql(GET_USERS_NFTS),
+			variables: {
+				request: {
+					ownerAddress: account,
+					contractAddress,
+					chainIds: [80001],
+					limit: 20,
+				},
+			},
+		});
+	}
+
+	async function getNfts(contractAddress) {
+		let { data } = await getUsersNfts(contractAddress);
+		console.log(data);
+		dispatch({ type: "SET_NFTS", payload: data.nfts.items });
+	}
+
+	const generateNftChallenge = (nfts) => {
+		return apolloClient.query({
+			query: gql(NFT_CHALLENGE),
+			variables: {
+				request: {
+					ethereumAddress: account,
+					nfts,
+				},
+			},
+		});
+	};
+
+	const createSetProfileImageUriTypedData = (request) => {
+		return apolloClient.mutate({
+			mutation: gql(CREATE_SET_PROFILE_IMAGE_URI_TYPED_DATA),
+			variables: {
+				request,
+			},
+		});
+	};
+
+	async function updateProfilePictureUri(profileId, index) {
+		let { contractAddress, tokenId, chainId } = apolloContext.nfts[index];
+		let { data } = await generateNftChallenge([
+			{ contractAddress, tokenId, chainId },
+		]);
+
+		let signer = await wallet.getSigner();
+		let signature = await signer.signMessage(
+			data.nftOwnershipChallenge.text
+		);
+		let response = await createSetProfileImageUriTypedData({
+			profileId,
+			nftData: {
+				id: data.nftOwnershipChallenge.id,
+				signature,
+			},
+		});
+		console.log(response);
 	}
 
 	return (
@@ -258,9 +491,11 @@ function ApolloContextProvider({ children }) {
 				authenticate,
 				getProfiles,
 				verify,
-				profiles,
-				currentProfile,
-				setCurrentProfile,
+				updateProfile,
+				apolloContext,
+				dispatch,
+				getNfts,
+				updateProfilePictureUri,
 			}}
 		>
 			{children}

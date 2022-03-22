@@ -28,12 +28,14 @@ export default function Header() {
 			justifyContent="space-between"
 			px={5}
 			py={4}
-			background=""
+			zIndex="1000"
+			background="white"
 			width="100%"
 			borderWidth="1px"
+			position="fixed"
 		>
 			<HStack>
-				<Link href="/home">
+				<Link href="/">
 					<Text>LensLive</Text>
 				</Link>
 				<Button variant="ghost">Explore</Button>
