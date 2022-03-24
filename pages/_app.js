@@ -9,6 +9,7 @@ import NetworkChangeModal from "../components/NetworkChangeModal";
 import Header from "../components/Header";
 
 function MyApp({ Component, pageProps }) {
+	const getLayout = Component.getLayout || ((page) => page);
 	return (
 		<ChakraProvider theme={theme}>
 			<Web3ContextProvider>
@@ -16,7 +17,7 @@ function MyApp({ Component, pageProps }) {
 					<NetworkChangeModal />
 					<MetamaskInstalledModal />
 					<Header />
-					<Component {...pageProps} />
+					{getLayout(<Component {...pageProps} />)}
 				</ApolloContextProvider>
 			</Web3ContextProvider>
 		</ChakraProvider>

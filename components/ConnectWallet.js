@@ -11,6 +11,7 @@ export default function ConnectWallet() {
 			isLoading={connectingAccount}
 			onClick={connect}
 			loadingText={loadingText}
+			maxWidth="200px"
 		>
 			Connect Wallet
 		</Button>

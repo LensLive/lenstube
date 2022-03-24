@@ -274,6 +274,386 @@ const CREATE_SET_PROFILE_IMAGE_URI_TYPED_DATA = `
  }
 `;
 
+const GET_PUBLICATIONS = `
+  query($request: PublicationsQueryRequest!) {
+    publications(request: $request) {
+      items {
+        __typename 
+        ... on Post {
+          ...PostFields
+        }
+        ... on Comment {
+          ...CommentFields
+        }
+        ... on Mirror {
+          ...MirrorFields
+        }
+      }
+      pageInfo {
+        prev
+        next
+        totalCount
+      }
+    }
+  }
+
+  fragment MediaFields on Media {
+    url
+    mimeType
+  }
+
+  fragment ProfileFields on Profile {
+    id
+    name
+    bio
+    location
+    website
+    twitterUrl
+    handle
+    picture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+      }
+    }
+    coverPicture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+      }
+    }
+    ownedBy
+    depatcher {
+      address
+    }
+    stats {
+      totalFollowers
+      totalFollowing
+      totalPosts
+      totalComments
+      totalMirrors
+      totalPublications
+      totalCollects
+    }
+    followModule {
+      ... on FeeFollowModuleSettings {
+        type
+        amount {
+          asset {
+            name
+            symbol
+            decimals
+            address
+          }
+          value
+        }
+        recipient
+      }
+    }
+  }
+
+  fragment PublicationStatsFields on PublicationStats { 
+    totalAmountOfMirrors
+    totalAmountOfCollects
+    totalAmountOfComments
+  }
+
+  fragment MetadataOutputFields on MetadataOutput {
+    name
+    description
+    content
+    media {
+      original {
+        ...MediaFields
+      }
+    }
+    attributes {
+      displayType
+      traitType
+      value
+    }
+  }
+
+  fragment Erc20Fields on Erc20 {
+    name
+    symbol
+    decimals
+    address
+  }
+
+  fragment CollectModuleFields on CollectModule {
+    __typename
+    ... on EmptyCollectModuleSettings {
+      type
+    }
+    ... on FeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedTimedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+    ... on RevertCollectModuleSettings {
+      type
+    }
+    ... on TimedFeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+  }
+
+  fragment PostFields on Post {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorBaseFields on Mirror {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorFields on Mirror {
+    ...MirrorBaseFields
+    mirrorOf {
+     ... on Post {
+        ...PostFields          
+     }
+     ... on Comment {
+        ...CommentFields          
+     }
+    }
+  }
+
+  fragment CommentBaseFields on Comment {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment CommentFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+        ...MirrorBaseFields
+        mirrorOf {
+          ... on Post {
+             ...PostFields          
+          }
+          ... on Comment {
+             ...CommentMirrorOfFields        
+          }
+        }
+      }
+    }
+  }
+
+  fragment CommentMirrorOfFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+         ...MirrorBaseFields
+      }
+    }
+  }
+`;
+
+const ENABLED_CURRENCIES = `
+  query {
+    enabledModuleCurrencies {
+      name
+      symbol
+      decimals
+      address
+    }
+  }
+`;
+
+const ENABLED_MODULES = `
+  query {
+    enabledModules {
+      collectModules {
+        moduleName
+        contractAddress
+        inputParams {
+          name
+          type
+        }
+        redeemParams {
+          name
+          type
+        }
+        returnDataParms {
+          name
+          type
+        }
+      }
+      followModules {
+        moduleName
+        contractAddress
+        inputParams {
+          name
+          type
+        }
+        redeemParams {
+          name
+          type
+        }
+        returnDataParms {
+          name
+          type
+        }
+      }
+      referenceModules {
+        moduleName
+        contractAddress
+        inputParams {
+          name
+          type
+        }
+        redeemParams {
+          name
+          type
+        }
+        returnDataParms {
+          name
+          type
+        }
+      }
+    }
+    }
+`;
+
+const MODULE_APPROVAL_DATA = `
+  query($request: GenerateModuleCurrencyApprovalDataRequest!) {
+    generateModuleCurrencyApprovalData(request: $request) {
+      to
+      from
+      data
+    }
+  }
+`;
+
+const ALLOWANCE = `
+  query($request: ApprovedModuleAllowanceAmountRequest!) {
+    approvedModuleAllowanceAmount(request: $request) {
+      currency
+      module
+      contractAddress
+      allowance
+    }
+  }
+`;
+
 const prettyJSON = (message, obj) => {
 	console.log(message, JSON.stringify(obj, null, 2));
 };
@@ -438,6 +818,7 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function getNfts(contractAddress) {
+		console.log("getting nfts");
 		let { data } = await getUsersNfts(contractAddress);
 		console.log(data);
 		dispatch({ type: "SET_NFTS", payload: data.nfts.items });
@@ -484,6 +865,50 @@ function ApolloContextProvider({ children }) {
 		console.log(response);
 	}
 
+	async function getPublications(getPublicationQuery) {
+		await login(account);
+
+		return apolloClient.query({
+			query: gql(GET_PUBLICATIONS),
+			variables: {
+				request: getPublicationQuery,
+			},
+		});
+	}
+
+	async function enabledCurrencies() {
+		await login(account);
+		return apolloClient.query({
+			query: gql(ENABLED_CURRENCIES),
+		});
+	}
+
+	async function enabledModules() {
+		return apolloClient.query({
+			query: gql(ENABLED_MODULES),
+		});
+	}
+
+	async function getModuleApprovalData(moduleApprovalRequest) {
+		await login(account);
+		return apolloClient.query({
+			query: gql(MODULE_APPROVAL_DATA),
+			variables: {
+				request: moduleApprovalRequest,
+			},
+		});
+	}
+
+	async function allowance(allowanceRequest) {
+		await login(account);
+		return apolloClient.query({
+			query: gql(ALLOWANCE),
+			variables: {
+				request: allowanceRequest,
+			},
+		});
+	}
+
 	return (
 		<ApolloContext.Provider
 			value={{
@@ -496,6 +921,11 @@ function ApolloContextProvider({ children }) {
 				dispatch,
 				getNfts,
 				updateProfilePictureUri,
+				getPublications,
+				enabledCurrencies,
+				enabledModules,
+				getModuleApprovalData,
+				allowance,
 			}}
 		>
 			{children}
