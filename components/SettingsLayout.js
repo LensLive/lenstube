@@ -9,9 +9,6 @@ export default function SettingsLayout({ children }) {
 	const { apolloContext } = useContext(ApolloContext);
 	const { currentProfile } = apolloContext;
 
-	useEffect(() => {
-		return console.log("unmounted");
-	});
 	return (
 		<HStack justifyContent="center" width="100%" py="100px">
 			{currentProfile !== undefined ? (

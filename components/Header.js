@@ -5,13 +5,6 @@ import {
 	Input,
 	InputGroup,
 	InputLeftElement,
-	Menu,
-	MenuList,
-	MenuItem,
-	Image,
-	MenuButton,
-	MenuDivider,
-	MenuGroup,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { HiOutlineSearch } from "react-icons/hi";
@@ -19,6 +12,7 @@ import ConnectWallet from "./ConnectWallet";
 import { useContext } from "react";
 import { Web3Context } from "../context/Web3Context";
 import { ProfileMenu } from "./ProfileMenu";
+import UploadButton from "./UploadButton";
 
 export default function Header() {
 	const { account } = useContext(Web3Context);
@@ -46,7 +40,16 @@ export default function Header() {
 				</InputLeftElement>
 				<Input placeholder="Search Profiles or Videos" />
 			</InputGroup>
-			<HStack>{account ? <ProfileMenu /> : <ConnectWallet />}</HStack>
+			<HStack>
+				{account ? (
+					<HStack>
+						<UploadButton />
+						<ProfileMenu />
+					</HStack>
+				) : (
+					<ConnectWallet />
+				)}
+			</HStack>
 		</HStack>
 	);
 }

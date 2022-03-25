@@ -19,7 +19,6 @@ export default function Home() {
 	useEffect(() => {
 		(async () => {
 			let response = await getRecommendedProfiles();
-			console.log(response);
 			setRecommendedProfiles(response.data.recommendedProfiles);
 		})();
 	}, []);
@@ -35,7 +34,7 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			<VStack overflow="hidden" py="75px" height="100vh" spacing="0">
+			<VStack py="75px" height="100vh" spacing="0">
 				<Grid templateColumns="1fr 4fr" width="100%" height="100%">
 					<Sidebar recommendedProfiles={recommendedProfiles} />
 					<VStack padding={5} alignItems="flex-start">

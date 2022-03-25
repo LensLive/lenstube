@@ -39,16 +39,15 @@ function CreateProfileModal() {
 	const [followPfp, setFollowPfp] = useState("");
 
 	useEffect(() => {
-		if (account !== null) {
+		if (profiles !== undefined && profiles.length > 0) {
 			(async () => {
 				let response = await getEnabledCurrencies();
 				let response2 = await getEnabledModules();
-				console.log(response);
 				setEnabledModules(response2.data.enabledModules);
 				setEnabledCurrencies(response.data.enabledModuleCurrencies);
 			})();
 		}
-	}, [account]);
+	}, [profiles]);
 
 	function handleChange(target, setter) {
 		setter(target.value);
@@ -72,21 +71,23 @@ function CreateProfileModal() {
 					  }
 					: { emptyFollowModule: true },
 		};
-		console.log(createProfileRequest);
 		let response = await createProfile(createProfileRequestObj);
 		onClose();
 		alert("Refresh and connect again");
-
-		// let repsonse2 = await pollUntilIndexed(
-		// 	response.data.createProfile.txHash
-		// );
-		// console.log(response2);
 	}
 
 	return (
 		<Modal
 			closeOnOverlayClick={profiles && profiles.length > 0}
-			isOpen={profiles && profiles.length == 0 ? true : isOpen}
+			isOpen={
+				account
+					? profiles
+						? profiles.length > 0
+							? isOpen
+							: true
+						: false
+					: false
+			}
 			onClose={onClose}
 		>
 			<ModalOverlay />

@@ -887,6 +887,39 @@ const HAS_TX_BEEN_INDEXED = `
   }
 `;
 
+const CREATE_POST_TYPED_DATA = `
+  mutation($request: CreatePublicPostRequest!) { 
+    createPostTypedData(request: $request) {
+      id
+      expiresAt
+      typedData {
+        types {
+          PostWithSig {
+            name
+            type
+          }
+        }
+      domain {
+        name
+        chainId
+        version
+        verifyingContract
+      }
+      value {
+        nonce
+        deadline
+        profileId
+        contentURI
+        collectModule
+        collectModuleData
+        referenceModule
+        referenceModuleData
+      }
+     }
+   }
+ }
+`;
+
 function ApolloContextProvider({ children }) {
 	const { wallet, account } = useContext(Web3Context);
 	const [apolloContext, dispatch] = useReducer(apolloReducer, {});
@@ -897,9 +930,7 @@ function ApolloContextProvider({ children }) {
 	});
 
 	useEffect(() => {
-		if (wallet !== null && account !== null) {
-			console.log(wallet);
-			console.log("getting profiles");
+		if (wallet !== null && account !== null && account !== undefined) {
 			getProfiles();
 		}
 	}, [account]);
@@ -986,17 +1017,18 @@ function ApolloContextProvider({ children }) {
 		let request = { ownedBy: account };
 
 		const profilesFromProfileIds = await getProfilesRequest(request);
-
 		dispatch({
 			type: "SET_PROFILES",
-			payload: [...profilesFromProfileIds.data.profiles.items],
+			payload: profilesFromProfileIds.data.profiles.items,
 		});
-		dispatch({ type: "CURRENT_PROFILE", payload: 0 });
+
+		if (profilesFromProfileIds.data.profiles.items) {
+			dispatch({ type: "CURRENT_PROFILE", payload: 0 });
+		}
 	}
 
 	async function updateProfile(profileInfo) {
 		await login(account);
-
 		return apolloClient.mutate({
 			mutation: gql(UPDATE_PROFILE),
 			variables: {
@@ -1021,7 +1053,6 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function getNfts(contractAddress) {
-		console.log("getting nfts");
 		let { data } = await getUsersNfts(contractAddress);
 		console.log(data);
 		dispatch({ type: "SET_NFTS", payload: data.nfts.items });
@@ -1080,14 +1111,14 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function enabledCurrencies() {
-		await login(account);
+		// await login(account);
 		return apolloClient.query({
 			query: gql(ENABLED_CURRENCIES),
 		});
 	}
 
 	async function enabledModules() {
-		await login(account);
+		// await login(account);
 		return apolloClient.query({
 			query: gql(ENABLED_MODULES),
 		});
@@ -1186,6 +1217,15 @@ function ApolloContextProvider({ children }) {
 			throw new Error(response.reason);
 		}
 	};
+
+	async function createPostTypedData(createPostTypedDataRequest) {
+		return apolloClient.mutate({
+			mutation: gql(CREATE_POST_TYPED_DATA),
+			variables: {
+				request: createPostTypedDataRequest,
+			},
+		});
+	}
 
 	return (
 		<ApolloContext.Provider

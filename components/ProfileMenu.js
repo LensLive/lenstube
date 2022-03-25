@@ -27,7 +27,7 @@ export function ProfileMenu() {
 
 	return (
 		<Menu>
-			{profiles && currentProfile !== undefined ? (
+			{profiles && profiles.length > 0 && currentProfile !== undefined ? (
 				<MenuButton
 					as={Button}
 					borderRadius="full"
@@ -62,7 +62,9 @@ export function ProfileMenu() {
 						width="100%"
 					>
 						<Text>Logged in as </Text>
-						{profiles && currentProfile !== undefined ? (
+						{profiles &&
+						profiles.length > 0 &&
+						currentProfile !== undefined ? (
 							<Text colorScheme="purple">
 								{profiles[currentProfile].handle}
 							</Text>
@@ -87,7 +89,7 @@ export function ProfileMenu() {
 				<MenuDivider />
 				<MenuGroup title="Switch Account">
 					<VStack as="ul" maxHeight="300px" overflowY="scroll">
-						{profiles
+						{profiles && profiles.length > 0
 							? profiles.map((profile, index) => {
 									return (
 										<MenuItem
