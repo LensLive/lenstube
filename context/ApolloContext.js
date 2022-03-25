@@ -654,6 +654,132 @@ const ALLOWANCE = `
   }
 `;
 
+const RECOMMENDED_PROFILES = `
+  query {
+    recommendedProfiles {
+        id
+        name
+        bio
+        location
+        website
+        twitterUrl
+        picture {
+          ... on NftImage {
+            contractAddress
+            tokenId
+            uri
+            verified
+          }
+          ... on MediaSet {
+            original {
+              url
+              width
+              height
+              mimeType
+            }
+            small {
+              url
+              width
+              height
+              mimeType
+            }
+            medium {
+              url
+              width
+              height
+              mimeType
+            }
+          }
+          __typename
+        }
+        handle
+        coverPicture {
+          ... on NftImage {
+            contractAddress
+            tokenId
+            uri
+            verified
+          }
+          ... on MediaSet {
+            original {
+              url
+              width
+              height
+              mimeType
+            }
+            small {
+              height
+              width
+              url
+              mimeType
+            }
+            medium {
+              url
+              width
+              height
+              mimeType
+            }
+          }
+          __typename
+        }
+        ownedBy
+        depatcher {
+          address
+          canUseRelay
+        }
+        stats {
+          totalFollowers
+          totalFollowing
+          totalPosts
+          totalComments
+          totalMirrors
+          totalPublications
+          totalCollects
+        }
+        followModule {
+          ... on FeeFollowModuleSettings {
+            type
+            amount {
+              asset {
+                symbol
+                name
+                decimals
+                address
+              }
+              value
+            }
+            recipient
+          }
+          __typename
+        }
+    }
+  }
+`;
+
+const DOES_FOLLOW = `
+  query($request: DoesFollowRequest!) {
+    doesFollow(request: $request) { 
+            followerAddress
+        profileId
+        follows
+        }
+  }
+`;
+
+const CREATE_PROFILE = `
+  mutation($request: CreateProfileRequest!) { 
+    createProfile(request: $request) {
+      ... on RelayerResult {
+        txHash
+      }
+      ... on RelayError {
+        reason
+      }
+            __typename
+    }
+ }
+`;
+
 const prettyJSON = (message, obj) => {
 	console.log(message, JSON.stringify(obj, null, 2));
 };
@@ -685,6 +811,82 @@ const apolloReducer = (state, action) => {
 	}
 };
 
+const HAS_TX_BEEN_INDEXED = `
+  query($request: HasTxHashBeenIndexedRequest!) {
+    hasTxHashBeenIndexed(request: $request) { 
+             ... on TransactionIndexedResult {
+        indexed
+                txReceipt {
+          to
+          from
+          contractAddress
+          transactionIndex
+          root
+          gasUsed
+          logsBloom
+          blockHash
+          transactionHash
+          blockNumber
+          confirmations
+          cumulativeGasUsed
+          effectiveGasPrice
+          byzantium
+          type
+          status
+          logs {
+            blockNumber
+            blockHash
+            transactionIndex
+            removed
+            address
+            data
+            topics
+            transactionHash
+            logIndex
+          }
+        }
+        metadataStatus {
+          status
+          reason
+        }
+        }
+        ... on TransactionError {
+        reason
+                txReceipt {
+          to
+          from
+          contractAddress
+          transactionIndex
+          root
+          gasUsed
+          logsBloom
+          blockHash
+          transactionHash
+          blockNumber
+          confirmations
+          cumulativeGasUsed
+          effectiveGasPrice
+          byzantium
+          type
+          status
+          logs {
+            blockNumber
+            blockHash
+            transactionIndex
+            removed
+            address
+            data
+            topics
+            transactionHash
+            logIndex
+          }
+        }
+        }
+            __typename
+        }
+  }
+`;
+
 function ApolloContextProvider({ children }) {
 	const { wallet, account } = useContext(Web3Context);
 	const [apolloContext, dispatch] = useReducer(apolloReducer, {});
@@ -696,6 +898,7 @@ function ApolloContextProvider({ children }) {
 
 	useEffect(() => {
 		if (wallet !== null && account !== null) {
+			console.log(wallet);
 			console.log("getting profiles");
 			getProfiles();
 		}
@@ -884,6 +1087,7 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function enabledModules() {
+		await login(account);
 		return apolloClient.query({
 			query: gql(ENABLED_MODULES),
 		});
@@ -909,6 +1113,80 @@ function ApolloContextProvider({ children }) {
 		});
 	}
 
+	async function getRecommendedProfiles() {
+		return apolloClient.query({
+			query: gql(RECOMMENDED_PROFILES),
+		});
+	}
+
+	async function doesFollow(followInfos) {
+		await login(account);
+		return apolloClient.query({
+			query: gql(DOES_FOLLOW),
+			variables: {
+				request: {
+					followInfos,
+				},
+			},
+		});
+	}
+
+	async function createProfile(createProfileRequest) {
+		await login(account);
+		console.log(createProfileRequest);
+		return apolloClient.mutate({
+			mutation: gql(CREATE_PROFILE),
+			variables: {
+				request: createProfileRequest,
+			},
+		});
+	}
+
+	async function hasTxBeenIndexed(txHash) {
+		return apolloClient.query({
+			query: gql(HAS_TX_BEEN_INDEXED),
+			variables: {
+				request: {
+					txHash,
+				},
+			},
+			fetchPolicy: "network-only",
+		});
+	}
+
+	const pollUntilIndexed = async (txHash) => {
+		while (true) {
+			console.log(txHash);
+			const result = await hasTxBeenIndexed(txHash);
+			const response = result.data.hasTxHashBeenIndexed;
+			if (response.__typename === "TransactionIndexedResult") {
+				if (response.metadataStatus) {
+					if (response.metadataStatus.status === "SUCCESS") {
+						return response;
+					}
+
+					if (
+						response.metadataStatus.status ===
+						"METADATA_VALIDATION_FAILED"
+					) {
+						throw new Error(response.metadataStatus.reason);
+					}
+				} else {
+					if (response.indexed) {
+						return response;
+					}
+				}
+
+				console.log(response);
+				// sleep for a second before trying again
+				await new Promise((resolve) => setTimeout(resolve, 500));
+			}
+			console.log("out of loop");
+			// it got reverted and failed!
+			throw new Error(response.reason);
+		}
+	};
+
 	return (
 		<ApolloContext.Provider
 			value={{
@@ -926,6 +1204,11 @@ function ApolloContextProvider({ children }) {
 				enabledModules,
 				getModuleApprovalData,
 				allowance,
+				getRecommendedProfiles,
+				doesFollow,
+				createProfile,
+				hasTxBeenIndexed,
+				pollUntilIndexed,
 			}}
 		>
 			{children}

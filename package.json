@@ -11,6 +11,8 @@
   "dependencies": {
     "@apollo/client": "^3.5.10",
     "@chakra-ui/react": "^1.8.6",
+    "@dicebear/avatars": "^4.10.2",
+    "@dicebear/micah": "^4.10.2",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
     "@fontsource/nunito": "^4.5.4",

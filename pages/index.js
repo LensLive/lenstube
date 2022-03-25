@@ -10,8 +10,20 @@ import {
 	Text,
 	Image,
 } from "@chakra-ui/react";
+import { ApolloContext } from "../context/ApolloContext";
+import { useContext, useEffect, useState } from "react";
 
 export default function Home() {
+	const [recommendedProfiles, setRecommendedProfiles] = useState([]);
+	const { getRecommendedProfiles } = useContext(ApolloContext);
+	useEffect(() => {
+		(async () => {
+			let response = await getRecommendedProfiles();
+			console.log(response);
+			setRecommendedProfiles(response.data.recommendedProfiles);
+		})();
+	}, []);
+
 	return (
 		<div>
 			<Head>
@@ -25,7 +37,7 @@ export default function Home() {
 
 			<VStack overflow="hidden" py="75px" height="100vh" spacing="0">
 				<Grid templateColumns="1fr 4fr" width="100%" height="100%">
-					<Sidebar />
+					<Sidebar recommendedProfiles={recommendedProfiles} />
 					<VStack padding={5} alignItems="flex-start">
 						<Heading>Discover</Heading>
 						<Grid gridGap={4} templateColumns="repeat(4, 1fr)">

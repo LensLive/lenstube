@@ -9,16 +9,20 @@ import {
 	Button,
 	Text,
 	VStack,
+	Avatar,
 } from "@chakra-ui/react";
 import { FiSettings } from "react-icons/fi";
 import { AiOutlineUser } from "react-icons/ai";
 import { ApolloContext } from "../context/ApolloContext";
 import { useContext } from "react";
 import Link from "next/link";
+import svgAvatarGenerator from "./svgAvatarGenerator";
+import { RootContext } from "../pages/_app";
 
 export function ProfileMenu() {
 	const { apolloContext, dispatch: apolloDispatch } =
 		useContext(ApolloContext);
+	const { onOpen } = useContext(RootContext);
 	const { profiles, currentProfile } = apolloContext;
 
 	return (
@@ -31,11 +35,23 @@ export function ProfileMenu() {
 					overflow="hidden"
 					padding={0}
 				>
-					<Image
-						src={profiles[currentProfile].picture}
-						alt="pfp"
-						w="100%"
-					/>
+					{profiles[currentProfile].picture ? (
+						<Avatar
+							src={profiles[currentProfile].picture.original.url}
+						/>
+					) : (
+						<Avatar
+							backgroundColor="white"
+							size="md"
+							bg="transparent"
+							src={svgAvatarGenerator(
+								profiles[currentProfile].ownedBy,
+								{
+									dataUri: true,
+								}
+							)}
+						/>
+					)}
 				</MenuButton>
 			) : null}
 			<MenuList>
@@ -84,18 +100,39 @@ export function ProfileMenu() {
 											as="li"
 											key={profile.id}
 										>
-											<Image
-												w={5}
-												mr={3}
-												borderRadius="full"
-												alt="pfp"
-												src={profiles[index].picture}
-											/>
+											{profile.picture ? (
+												<Avatar
+													src={
+														profile.picture.original
+															.url
+													}
+												/>
+											) : (
+												<Avatar
+													backgroundColor="white"
+													size="md"
+													bg="transparent"
+													src={svgAvatarGenerator(
+														profile.ownedBy,
+														{
+															dataUri: true,
+														}
+													)}
+												/>
+											)}
 											<span>{profile.handle}</span>
 										</MenuItem>
 									);
 							  })
 							: null}
+					</VStack>
+				</MenuGroup>
+				<MenuDivider />
+				<MenuGroup>
+					<VStack padding={1}>
+						<Button onClick={onOpen} width="100%">
+							Create Profile
+						</Button>
 					</VStack>
 				</MenuGroup>
 			</MenuList>

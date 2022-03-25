@@ -1,5 +1,6 @@
 import "../styles/globals.css";
-import { ChakraProvider } from "@chakra-ui/react";
+import React from "react";
+import { ChakraProvider, useDisclosure } from "@chakra-ui/react";
 import theme from "../theme";
 import "@fontsource/nunito";
 import Web3ContextProvider from "../context/Web3Context";
@@ -7,8 +8,12 @@ import ApolloContextProvider from "../context/ApolloContext";
 import MetamaskInstalledModal from "../components/MetamaskInstalledModal";
 import NetworkChangeModal from "../components/NetworkChangeModal";
 import Header from "../components/Header";
+import CreateProfileModal from "../components/CreateProfileModal";
+
+export const RootContext = React.createContext(null);
 
 function MyApp({ Component, pageProps }) {
+	const { isOpen, onOpen, onClose } = useDisclosure();
 	const getLayout = Component.getLayout || ((page) => page);
 	return (
 		<ChakraProvider theme={theme}>
@@ -16,7 +21,10 @@ function MyApp({ Component, pageProps }) {
 				<ApolloContextProvider>
 					<NetworkChangeModal />
 					<MetamaskInstalledModal />
-					<Header />
+					<RootContext.Provider value={{ isOpen, onOpen, onClose }}>
+						<CreateProfileModal />
+						<Header />
+					</RootContext.Provider>
 					{getLayout(<Component {...pageProps} />)}
 				</ApolloContextProvider>
 			</Web3ContextProvider>

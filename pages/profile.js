@@ -20,7 +20,7 @@ import { useEffect, useContext } from "react";
 import { ApolloContext } from "../context/ApolloContext";
 import ConnectWallet from "../components/ConnectWallet";
 import { Web3Context } from "../context/Web3Context";
-// import { MdLanguage } from "react/md";
+import svgAvatarGenerator from "../components/svgAvatarGenerator";
 export default function Profile() {
 	const { account } = useContext(Web3Context);
 	const { apolloContext, getPublications } = useContext(ApolloContext);
@@ -71,19 +71,37 @@ export default function Profile() {
 								width: "100%",
 							}}
 						>
-							<Avatar
-								src={
-									profiles[currentProfile].picture
-										? profiles[currentProfile].picture
-										: "https://bit.ly/dan-abramov"
-								}
-								size="2xl"
-								position="absolute"
-								top="-60px"
-								outline="3px solid"
-								outlineOffset={2}
-								outlineColor="purple.400"
-							/>
+							{profiles[currentProfile].picture ? (
+								<Avatar
+									size="2xl"
+									position="absolute"
+									top="-60px"
+									outline="3px solid"
+									outlineOffset={2}
+									outlineColor="purple.400"
+									src={
+										profiles[currentProfile].picture
+											.original.url
+									}
+								/>
+							) : (
+								<Avatar
+									backgroundColor="white"
+									bg="transparent"
+									size="2xl"
+									position="absolute"
+									top="-60px"
+									outline="3px solid"
+									outlineOffset={2}
+									outlineColor="purple.400"
+									src={svgAvatarGenerator(
+										profiles[currentProfile].ownedBy,
+										{
+											dataUri: true,
+										}
+									)}
+								/>
+							)}
 							<VStack
 								pt="60px"
 								alignItems="flex-start"
@@ -142,28 +160,38 @@ export default function Profile() {
 										<span>Followers</span>
 									</VStack>
 								</HStack>
-								<Tag>
-									<FiTwitter />
-									<span style={{ marginLeft: "5px" }}>
-										{profiles[
-											currentProfile
-										].twitterUrl.replace(
-											"https://twitter.com/",
-											""
-										)}
-									</span>
-								</Tag>
-								<Tag>
-									<BiWorld />
-									<span style={{ marginLeft: "5px" }}>
-										{profiles[currentProfile].location}
-									</span>
-								</Tag>
-								<Tag>{profiles[currentProfile].website}</Tag>
-								<VStack alignItems="flex-start">
-									<span>Bio</span>
-									<p>{profiles[currentProfile].bio}</p>
-								</VStack>
+								{profiles[currentProfile].twitterUrl ? (
+									<Tag>
+										<FiTwitter />
+										<span style={{ marginLeft: "5px" }}>
+											{profiles[
+												currentProfile
+											].twitterUrl.replace(
+												"https://twitter.com/",
+												""
+											)}
+										</span>
+									</Tag>
+								) : null}
+								{profiles[currentProfile].location ? (
+									<Tag>
+										<BiWorld />
+										<span style={{ marginLeft: "5px" }}>
+											{profiles[currentProfile].location}
+										</span>
+									</Tag>
+								) : null}
+								{profiles[currentProfile].website ? (
+									<Tag>
+										{profiles[currentProfile].website}
+									</Tag>
+								) : null}
+								{profiles[currentProfile].bio ? (
+									<VStack alignItems="flex-start">
+										<span>Bio</span>
+										<p>{profiles[currentProfile].bio}</p>
+									</VStack>
+								) : null}
 								<Button>Follow</Button>
 							</VStack>
 						</VStack>
