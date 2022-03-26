@@ -931,7 +931,7 @@ function ApolloContextProvider({ children }) {
 
 	useEffect(() => {
 		if (wallet !== null && account !== null && account !== undefined) {
-			getProfiles();
+			getProfilesByAccount();
 		}
 	}, [account]);
 
@@ -1011,7 +1011,12 @@ function ApolloContextProvider({ children }) {
 		}
 	}
 
-	async function getProfiles() {
+	async function getProfilesByProfileIds(request) {
+		const response = await getProfilesRequest(request);
+		return response;
+	}
+
+	async function getProfilesByAccount() {
 		await login(account);
 
 		let request = { ownedBy: account };
@@ -1023,6 +1028,7 @@ function ApolloContextProvider({ children }) {
 		});
 
 		if (profilesFromProfileIds.data.profiles.items) {
+			console.log(profilesFromProfileIds);
 			dispatch({ type: "CURRENT_PROFILE", payload: 0 });
 		}
 	}
@@ -1100,8 +1106,6 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function getPublications(getPublicationQuery) {
-		await login(account);
-
 		return apolloClient.query({
 			query: gql(GET_PUBLICATIONS),
 			variables: {
@@ -1233,7 +1237,8 @@ function ApolloContextProvider({ children }) {
 			value={{
 				apolloClient,
 				authenticate,
-				getProfiles,
+				getProfiles: getProfilesByAccount,
+				getProfilesByProfileIds,
 				verify,
 				updateProfile,
 				apolloContext,

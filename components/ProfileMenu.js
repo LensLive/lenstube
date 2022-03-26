@@ -74,18 +74,22 @@ export function ProfileMenu() {
 					</VStack>
 				</MenuItem>
 				<MenuDivider />
-				<MenuGroup title="Account">
-					<Link href="/profile">
-						<MenuItem icon={<AiOutlineUser />}>
-							<Text>Profile</Text>
-						</MenuItem>
-					</Link>
-					<Link href="/settings">
-						<MenuItem icon={<FiSettings />}>
-							<Text>Settings</Text>
-						</MenuItem>
-					</Link>
-				</MenuGroup>
+				{profiles &&
+				profiles.length > 0 &&
+				currentProfile !== undefined ? (
+					<MenuGroup title="Account">
+						<Link href={`/user/${profiles[currentProfile].id}`}>
+							<MenuItem icon={<AiOutlineUser />}>
+								<Text>Profile</Text>
+							</MenuItem>
+						</Link>
+						<Link href="/settings">
+							<MenuItem icon={<FiSettings />}>
+								<Text>Settings</Text>
+							</MenuItem>
+						</Link>
+					</MenuGroup>
+				) : null}
 				<MenuDivider />
 				<MenuGroup title="Switch Account">
 					<VStack as="ul" maxHeight="300px" overflowY="scroll">

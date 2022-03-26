@@ -139,7 +139,7 @@ function UploadModal() {
 							animation_url:
 								taskResponse.data[0].output.export.ipfs
 									.videoFileUrl,
-							appId: "lenslive",
+							appId: "lenstube",
 						};
 						let ipfsResult = await client.add(
 							JSON.stringify(pubMetadata)

@@ -32,9 +32,8 @@ export default function Header() {
 		>
 			<HStack>
 				<Link href="/">
-					<Text>LensLive</Text>
+					<Text>LensTube</Text>
 				</Link>
-				<Button variant="ghost">Explore</Button>
 			</HStack>
 			<InputGroup maxWidth="500px">
 				<InputLeftElement>
