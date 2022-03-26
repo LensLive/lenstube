@@ -13,9 +13,11 @@ import { useContext } from "react";
 import { Web3Context } from "../context/Web3Context";
 import { ProfileMenu } from "./ProfileMenu";
 import UploadButton from "./UploadButton";
+import { RootContext } from "../pages/_app";
 
 export default function Header() {
 	const { account } = useContext(Web3Context);
+	const { uploadModalOnOpen } = useContext(RootContext);
 
 	return (
 		<HStack
@@ -43,7 +45,7 @@ export default function Header() {
 			<HStack>
 				{account ? (
 					<HStack>
-						<UploadButton />
+						<Button onClick={uploadModalOnOpen}>Upload</Button>
 						<ProfileMenu />
 					</HStack>
 				) : (

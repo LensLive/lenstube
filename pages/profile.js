@@ -39,7 +39,7 @@ export default function Profile() {
 	}, [currentProfile]);
 	return (
 		<Grid py="74px">
-			{currentProfile !== undefined && profiles !== null ? (
+			{currentProfile !== undefined && profiles != null ? (
 				<VStack spacing={0}>
 					<Box height="250px" overflow="hidden" width="100%">
 						<Image

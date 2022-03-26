@@ -9,11 +9,17 @@ import MetamaskInstalledModal from "../components/MetamaskInstalledModal";
 import NetworkChangeModal from "../components/NetworkChangeModal";
 import Header from "../components/Header";
 import CreateProfileModal from "../components/CreateProfileModal";
+import UploadModal from "../components/UploadModal";
 
 export const RootContext = React.createContext(null);
 
 function MyApp({ Component, pageProps }) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const {
+		isOpen: isUploadModalOpen,
+		onOpen: uploadModalOnOpen,
+		onClose: uploadModalOnClose,
+	} = useDisclosure();
 	const getLayout = Component.getLayout || ((page) => page);
 	return (
 		<ChakraProvider theme={theme}>
@@ -21,7 +27,17 @@ function MyApp({ Component, pageProps }) {
 				<ApolloContextProvider>
 					<NetworkChangeModal />
 					<MetamaskInstalledModal />
-					<RootContext.Provider value={{ isOpen, onOpen, onClose }}>
+					<RootContext.Provider
+						value={{
+							isOpen,
+							onOpen,
+							onClose,
+							isUploadModalOpen,
+							uploadModalOnClose,
+							uploadModalOnOpen,
+						}}
+					>
+						<UploadModal />
 						<CreateProfileModal />
 						<Header />
 					</RootContext.Provider>

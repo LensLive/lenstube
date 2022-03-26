@@ -1219,6 +1219,7 @@ function ApolloContextProvider({ children }) {
 	};
 
 	async function createPostTypedData(createPostTypedDataRequest) {
+		await login(account);
 		return apolloClient.mutate({
 			mutation: gql(CREATE_POST_TYPED_DATA),
 			variables: {
@@ -1249,6 +1250,7 @@ function ApolloContextProvider({ children }) {
 				createProfile,
 				hasTxBeenIndexed,
 				pollUntilIndexed,
+				createPostTypedData,
 			}}
 		>
 			{children}
