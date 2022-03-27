@@ -45,7 +45,7 @@ export function ProfileMenu() {
 							size="md"
 							bg="transparent"
 							src={svgAvatarGenerator(
-								profiles[currentProfile].ownedBy,
+								profiles[currentProfile].id,
 								{
 									dataUri: true,
 								}
@@ -66,7 +66,7 @@ export function ProfileMenu() {
 						profiles.length > 0 &&
 						currentProfile !== undefined ? (
 							<Text colorScheme="purple">
-								{profiles[currentProfile].handle}
+								{profiles[currentProfile].name}
 							</Text>
 						) : (
 							<Text>loading...</Text>
@@ -119,7 +119,7 @@ export function ProfileMenu() {
 													size="md"
 													bg="transparent"
 													src={svgAvatarGenerator(
-														profile.ownedBy,
+														profile.id,
 														{
 															dataUri: true,
 														}

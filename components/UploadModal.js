@@ -203,10 +203,9 @@ function UploadModal() {
 						break;
 					}
 				}
-				console.log(taskResponse);
 				await new Promise((resolve) => setTimeout(resolve, 5000));
 			}
-
+			uploadModalOnClose();
 			setVideoUploading(false);
 		};
 	}

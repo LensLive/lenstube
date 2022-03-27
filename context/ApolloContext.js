@@ -8,6 +8,9 @@ import {
 } from "@apollo/client";
 import fetch from "cross-fetch";
 import { Web3Context } from "./Web3Context";
+import { utils, ethers } from "ethers";
+import omitDeep from "omit-deep";
+import { LENS_HUB_ABI } from "../abi";
 
 export const ApolloContext = React.createContext();
 
@@ -19,12 +22,20 @@ const httpLink = new HttpLink({
 const authLink = new ApolloLink((operation, forward) => {
 	const token = localStorage.getItem("lensAPIAccessToken");
 
+	if (
+		operation &&
+		operation.variables &&
+		operation.variables.request &&
+		operation.variables.request.sortCriteria
+	) {
+	} else {
+		operation.setContext({
+			headers: {
+				"x-access-token": token ? `Bearer ${token}` : "",
+			},
+		});
+	}
 	// Use the setContext method to set the HTTP headers.
-	operation.setContext({
-		headers: {
-			"x-access-token": token ? `Bearer ${token}` : "",
-		},
-	});
 
 	// Call the next link in the middleware chain.
 	return forward(operation);
@@ -780,6 +791,319 @@ const CREATE_PROFILE = `
  }
 `;
 
+const EXPLORE_PUBLICATIONS = `
+  query($request: ExplorePublicationRequest!) {
+    explorePublications(request: $request) {
+      items {
+        __typename 
+        ... on Post {
+          ...PostFields
+        }
+        ... on Comment {
+          ...CommentFields
+        }
+        ... on Mirror {
+          ...MirrorFields
+        }
+      }
+      pageInfo {
+        prev
+        next
+        totalCount
+      }
+    }
+  }
+
+  fragment MediaFields on Media {
+    url
+    width
+    height
+    mimeType
+  }
+
+  fragment ProfileFields on Profile {
+    id
+    name
+    bio
+    location
+    website
+    twitterUrl
+    handle
+    picture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+        small {
+          ...MediaFields
+        }
+        medium {
+          ...MediaFields
+        }
+      }
+    }
+    coverPicture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+        small {
+         ...MediaFields
+        }
+        medium {
+          ...MediaFields
+        }
+      }
+    }
+    ownedBy
+    depatcher {
+      address
+    }
+    stats {
+      totalFollowers
+      totalFollowing
+      totalPosts
+      totalComments
+      totalMirrors
+      totalPublications
+      totalCollects
+    }
+    followModule {
+      ... on FeeFollowModuleSettings {
+        type
+        amount {
+          asset {
+            name
+            symbol
+            decimals
+            address
+          }
+          value
+        }
+        recipient
+      }
+    }
+  }
+
+  fragment PublicationStatsFields on PublicationStats { 
+    totalAmountOfMirrors
+    totalAmountOfCollects
+    totalAmountOfComments
+  }
+
+  fragment MetadataOutputFields on MetadataOutput {
+    name
+    description
+    content
+    media {
+      original {
+        ...MediaFields
+      }
+      small {
+        ...MediaFields
+      }
+      medium {
+        ...MediaFields
+      }
+    }
+    attributes {
+      displayType
+      traitType
+      value
+    }
+  }
+
+  fragment Erc20Fields on Erc20 {
+    name
+    symbol
+    decimals
+    address
+  }
+
+  fragment CollectModuleFields on CollectModule {
+    __typename
+    ... on EmptyCollectModuleSettings {
+      type
+    }
+    ... on FeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedTimedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+    ... on RevertCollectModuleSettings {
+      type
+    }
+    ... on TimedFeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+  }
+
+  fragment PostFields on Post {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorBaseFields on Mirror {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorFields on Mirror {
+    ...MirrorBaseFields
+    mirrorOf {
+     ... on Post {
+        ...PostFields          
+     }
+     ... on Comment {
+        ...CommentFields          
+     }
+    }
+  }
+
+  fragment CommentBaseFields on Comment {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment CommentFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+        ...MirrorBaseFields
+        mirrorOf {
+          ... on Post {
+             ...PostFields          
+          }
+          ... on Comment {
+             ...CommentMirrorOfFields        
+          }
+        }
+      }
+    }
+  }
+
+  fragment CommentMirrorOfFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+         ...MirrorBaseFields
+      }
+    }
+  }
+`;
+
 const prettyJSON = (message, obj) => {
 	console.log(message, JSON.stringify(obj, null, 2));
 };
@@ -920,6 +1244,399 @@ const CREATE_POST_TYPED_DATA = `
  }
 `;
 
+const GET_PUBLICATION = `
+  query($request: PublicationQueryRequest!) {
+    publication(request: $request) {
+        __typename 
+        ... on Post {
+          ...PostFields
+        }
+        ... on Comment {
+          ...CommentFields
+        }
+        ... on Mirror {
+          ...MirrorFields
+      }
+    }
+  }
+
+  fragment MediaFields on Media {
+    url
+    mimeType
+  }
+
+  fragment ProfileFields on Profile {
+    id
+    name
+    bio
+    location
+    website
+    twitterUrl
+    handle
+    picture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+      }
+    }
+    coverPicture {
+      ... on NftImage {
+        contractAddress
+        tokenId
+        uri
+        verified
+      }
+      ... on MediaSet {
+        original {
+          ...MediaFields
+        }
+      }
+    }
+    ownedBy
+    depatcher {
+      address
+    }
+    stats {
+      totalFollowers
+      totalFollowing
+      totalPosts
+      totalComments
+      totalMirrors
+      totalPublications
+      totalCollects
+    }
+    followModule {
+      ... on FeeFollowModuleSettings {
+        type
+        amount {
+          asset {
+            name
+            symbol
+            decimals
+            address
+          }
+          value
+        }
+        recipient
+      }
+    }
+  }
+
+  fragment PublicationStatsFields on PublicationStats { 
+    totalAmountOfMirrors
+    totalAmountOfCollects
+    totalAmountOfComments
+  }
+
+  fragment MetadataOutputFields on MetadataOutput {
+    name
+    description
+    content
+    media {
+      original {
+        ...MediaFields
+      }
+    }
+    attributes {
+      displayType
+      traitType
+      value
+    }
+  }
+
+  fragment Erc20Fields on Erc20 {
+    name
+    symbol
+    decimals
+    address
+  }
+
+  fragment CollectModuleFields on CollectModule {
+    __typename
+    ... on EmptyCollectModuleSettings {
+      type
+    }
+    ... on FeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+    }
+    ... on LimitedTimedFeeCollectModuleSettings {
+      type
+      collectLimit
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+    ... on RevertCollectModuleSettings {
+      type
+    }
+    ... on TimedFeeCollectModuleSettings {
+      type
+      amount {
+        asset {
+          ...Erc20Fields
+        }
+        value
+      }
+      recipient
+      referralFee
+      endTimestamp
+    }
+  }
+
+  fragment PostFields on Post {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorBaseFields on Mirror {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment MirrorFields on Mirror {
+    ...MirrorBaseFields
+    mirrorOf {
+     ... on Post {
+        ...PostFields          
+     }
+     ... on Comment {
+        ...CommentFields          
+     }
+    }
+  }
+
+  fragment CommentBaseFields on Comment {
+    id
+    profile {
+      ...ProfileFields
+    }
+    stats {
+      ...PublicationStatsFields
+    }
+    metadata {
+      ...MetadataOutputFields
+    }
+    createdAt
+    collectModule {
+      ...CollectModuleFields
+    }
+    referenceModule {
+      ... on FollowOnlyReferenceModuleSettings {
+        type
+      }
+    }
+    appId
+  }
+
+  fragment CommentFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+        ...MirrorBaseFields
+        mirrorOf {
+          ... on Post {
+             ...PostFields          
+          }
+          ... on Comment {
+             ...CommentMirrorOfFields        
+          }
+        }
+      }
+    }
+  }
+
+  fragment CommentMirrorOfFields on Comment {
+    ...CommentBaseFields
+    mainPost {
+      ... on Post {
+        ...PostFields
+      }
+      ... on Mirror {
+         ...MirrorBaseFields
+      }
+    }
+  }
+`;
+
+const CREATE_COMMENT_TYPED_DATA = `
+  mutation($request: CreatePublicCommentRequest!) { 
+    createCommentTypedData(request: $request) {
+      id
+      expiresAt
+      typedData {
+        types {
+          CommentWithSig {
+            name
+            type
+          }
+        }
+      domain {
+        name
+        chainId
+        version
+        verifyingContract
+      }
+      value {
+        nonce
+        deadline
+        profileId
+        profileIdPointed
+        pubIdPointed
+        contentURI
+        collectModule
+        collectModuleData
+        referenceModule
+        referenceModuleData
+      }
+     }
+   }
+ }
+`;
+
+const CREATE_FOLLOW_TYPED_DATA = `
+  mutation($request: FollowRequest!) { 
+    createFollowTypedData(request: $request) {
+      id
+      expiresAt
+      typedData {
+        domain {
+          name
+          chainId
+          version
+          verifyingContract
+        }
+        types {
+          FollowWithSig {
+            name
+            type
+          }
+        }
+        value {
+          nonce
+          deadline
+          profileIds
+          datas
+        }
+      }
+    }
+ }
+`;
+
+const HAS_COLLECTED = `
+  query($request: HasCollectedRequest!) {
+    hasCollected(request: $request) {
+      walletAddress
+      results {
+        collected
+        publicationId
+        collectedTimes
+      }
+    }
+  }
+`;
+
+const CREATE_COLLECT_TYPED_DATA = `
+  mutation($request: CreateCollectRequest!) { 
+    createCollectTypedData(request: $request) {
+      id
+      expiresAt
+      typedData {
+        types {
+          CollectWithSig {
+            name
+            type
+          }
+        }
+      domain {
+        name
+        chainId
+        version
+        verifyingContract
+      }
+      value {
+        nonce
+        deadline
+        profileId
+        pubId
+        data
+      }
+     }
+   }
+ }
+`;
+
 function ApolloContextProvider({ children }) {
 	const { wallet, account } = useContext(Web3Context);
 	const [apolloContext, dispatch] = useReducer(apolloReducer, {});
@@ -927,6 +1644,16 @@ function ApolloContextProvider({ children }) {
 	const apolloClient = new ApolloClient({
 		link: authLink.concat(httpLink),
 		cache: new InMemoryCache(),
+		defaultOptions: {
+			watchQuery: {
+				fetchPolicy: "no-cache",
+				errorPolicy: "ignore",
+			},
+			query: {
+				fetchPolicy: "no-cache",
+				errorPolicy: "all",
+			},
+		},
 	});
 
 	useEffect(() => {
@@ -1156,6 +1883,7 @@ function ApolloContextProvider({ children }) {
 
 	async function doesFollow(followInfos) {
 		await login(account);
+		console.log(followInfos);
 		return apolloClient.query({
 			query: gql(DOES_FOLLOW),
 			variables: {
@@ -1232,6 +1960,181 @@ function ApolloContextProvider({ children }) {
 		});
 	}
 
+	async function explorePublications() {
+		return apolloClient.query({
+			query: gql(EXPLORE_PUBLICATIONS),
+			variables: {
+				request: {
+					sources: ["lenstube"],
+					sortCriteria: "TOP_COMMENTED",
+				},
+			},
+			fetchPolicy: "network-only",
+		});
+	}
+
+	async function getPublication(publicationId) {
+		console.log(publicationId);
+		return apolloClient.query({
+			query: gql(GET_PUBLICATION),
+			variables: {
+				request: {
+					publicationId: publicationId,
+				},
+			},
+		});
+	}
+
+	async function createCommentTypedData(createCommentTypedDataRequest) {
+		return apolloClient.mutate({
+			mutation: gql(CREATE_COMMENT_TYPED_DATA),
+			variables: {
+				request: createCommentTypedDataRequest,
+			},
+		});
+	}
+
+	async function createFollowTypedData(followRequestInfo) {
+		console.log(followRequestInfo);
+		6;
+		return apolloClient.mutate({
+			mutation: gql(CREATE_FOLLOW_TYPED_DATA),
+			variables: {
+				request: followRequestInfo,
+			},
+		});
+	}
+
+	const splitSignature = (signature) => {
+		return utils.splitSignature(signature);
+	};
+
+	async function signedTypeData(domain, types, value) {
+		const signer = await wallet.getSigner();
+		return signer._signTypedData(
+			omitDeep(domain, "__typename"),
+			omitDeep(types, "__typename"),
+			omitDeep(value, "__typename")
+		);
+	}
+
+	async function commentWithSig(typedData) {
+		const signature = await signedTypeData(
+			typedData.domain,
+			typedData.types,
+			typedData.value
+		);
+
+		console.log("create post: signature", signature);
+
+		const { v, r, s } = splitSignature(signature);
+		const signer = await wallet.getSigner();
+		const lensHub = new ethers.Contract(
+			"0xd7B3481De00995046C7850bCe9a5196B7605c367",
+			LENS_HUB_ABI,
+			signer
+		);
+
+		const tx = await lensHub.commentWithSig({
+			profileId: typedData.value.profileId,
+			contentURI: typedData.value.contentURI,
+			profileIdPointed: typedData.value.profileIdPointed,
+			pubIdPointed: typedData.value.pubIdPointed,
+			collectModule: typedData.value.collectModule,
+			collectModuleData: typedData.value.collectModuleData,
+			referenceModule: typedData.value.referenceModule,
+			referenceModuleData: typedData.value.referenceModuleData,
+			sig: {
+				v,
+				r,
+				s,
+				deadline: typedData.value.deadline,
+			},
+		});
+		console.log("create post: tx hash", tx.hash);
+	}
+
+	async function followWithSig(typedData) {
+		const signature = await signedTypeData(
+			typedData.domain,
+			typedData.types,
+			typedData.value
+		);
+
+		console.log("create post: signature", signature);
+
+		const { v, r, s } = splitSignature(signature);
+		const signer = await wallet.getSigner();
+		const lensHub = new ethers.Contract(
+			"0xd7B3481De00995046C7850bCe9a5196B7605c367",
+			LENS_HUB_ABI,
+			signer
+		);
+
+		const tx = await lensHub.followWithSig({
+			follower: account,
+			profileIds: typedData.value.profileIds,
+			datas: typedData.value.datas,
+			sig: {
+				v,
+				r,
+				s,
+				deadline: typedData.value.deadline,
+			},
+		});
+		console.log("create post: tx hash", tx.hash);
+	}
+
+	async function hasCollected(request) {
+		return apolloClient.query({
+			query: gql(HAS_COLLECTED),
+			variables: {
+				request,
+			},
+		});
+	}
+
+	async function createCollectTypedData(createCollectTypedDataRequest) {
+		return apolloClient.mutate({
+			mutation: gql(CREATE_COLLECT_TYPED_DATA),
+			variables: {
+				request: createCollectTypedDataRequest,
+			},
+		});
+	}
+
+	async function collectWithSig(typedData) {
+		const signature = await signedTypeData(
+			typedData.domain,
+			typedData.types,
+			typedData.value
+		);
+
+		console.log("create post: signature", signature);
+
+		const { v, r, s } = splitSignature(signature);
+		const signer = await wallet.getSigner();
+		const lensHub = new ethers.Contract(
+			"0xd7B3481De00995046C7850bCe9a5196B7605c367",
+			LENS_HUB_ABI,
+			signer
+		);
+
+		const tx = await lensHub.collectWithSig({
+			collector: account,
+			profileId: typedData.value.profileId,
+			pubId: typedData.value.pubId,
+			data: typedData.value.data,
+			sig: {
+				v,
+				r,
+				s,
+				deadline: typedData.value.deadline,
+			},
+		});
+		console.log("create post: tx hash", tx.hash);
+	}
+
 	return (
 		<ApolloContext.Provider
 			value={{
@@ -1256,6 +2159,15 @@ function ApolloContextProvider({ children }) {
 				hasTxBeenIndexed,
 				pollUntilIndexed,
 				createPostTypedData,
+				explorePublications,
+				getPublication,
+				commentWithSig,
+				createCommentTypedData,
+				createFollowTypedData,
+				followWithSig,
+				hasCollected,
+				collectWithSig,
+				createCollectTypedData,
 			}}
 		>
 			{children}

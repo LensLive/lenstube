@@ -122,7 +122,7 @@ export default function Profile() {
 									outline="3px solid"
 									outlineOffset={2}
 									outlineColor="purple.400"
-									src={svgAvatarGenerator(profile.ownedBy, {
+									src={svgAvatarGenerator(profile.id, {
 										dataUri: true,
 									})}
 								/>
@@ -287,7 +287,7 @@ export default function Profile() {
 																			src={svgAvatarGenerator(
 																				post
 																					.profile
-																					.ownedBy,
+																					.id,
 																				{
 																					dataUri: true,
 																				}
@@ -328,8 +328,10 @@ export default function Profile() {
 																			.original
 																			.url
 																	}
-																	autoPlay="true"
-																	loop="true"
+																	autoPlay={
+																		true
+																	}
+																	loop={true}
 																/>
 																<HStack
 																	width="100%"
@@ -356,7 +358,7 @@ export default function Profile() {
 																			{
 																				post
 																					.stats
-																					.totalAmountOfComments
+																					.totalAmountOfCollects
 																			}
 																		</Text>
 																	</HStack>
@@ -383,12 +385,115 @@ export default function Profile() {
 										{posts && comments.length > 0
 											? comments.map((comment) => {
 													return (
-														<span>
-															{
-																comment.metadata
-																	.name
-															}
-														</span>
+														<VStack
+															key={comment.id}
+															alignItems="flex-start"
+															border="1px solid var(--chakra-colors-gray-200)"
+															padding={3}
+															spacing={3}
+															borderRadius="10px"
+														>
+															<Text>
+																{`Commented on ${comment.mainPost.profile.name}'s video`}
+															</Text>
+															<HStack spacing={5}>
+																{comment.profile
+																	.picture !==
+																null ? (
+																	<Avatar
+																		size="md"
+																		outline="3px solid"
+																		outlineOffset={
+																			2
+																		}
+																		outlineColor="purple.400"
+																		src={
+																			comment
+																				.profile
+																				.picture
+																				.original
+																				.url
+																		}
+																	/>
+																) : (
+																	<Avatar
+																		backgroundColor="white"
+																		bg="transparent"
+																		size="md"
+																		outline="3px solid"
+																		outlineOffset={
+																			2
+																		}
+																		outlineColor="purple.400"
+																		src={svgAvatarGenerator(
+																			comment
+																				.profile
+																				.id,
+																			{
+																				dataUri: true,
+																			}
+																		)}
+																	/>
+																)}
+																<VStack
+																	spacing={0}
+																	alignItems="flex-start"
+																>
+																	<Text fontWeight="600">
+																		{
+																			comment
+																				.profile
+																				.name
+																		}
+																	</Text>
+																	<Text>
+																		{
+																			comment
+																				.metadata
+																				.content
+																		}
+																	</Text>
+																</VStack>
+															</HStack>
+															<HStack
+																width="100%"
+																justifyContent="center"
+																spacing={5}
+															>
+																<HStack
+																	spacing={2}
+																>
+																	<BiComment />
+																	<Text>
+																		{
+																			comment
+																				.stats
+																				.totalAmountOfComments
+																		}
+																	</Text>
+																</HStack>
+																<HStack>
+																	<BsCollection />
+																	<Text>
+																		{
+																			comment
+																				.stats
+																				.totalAmountOfCollects
+																		}
+																	</Text>
+																</HStack>
+																<HStack>
+																	<BiCopy />
+																	<Text>
+																		{
+																			comment
+																				.stats
+																				.totalAmountOfMirrors
+																		}
+																	</Text>
+																</HStack>
+															</HStack>
+														</VStack>
 													);
 											  })
 											: null}

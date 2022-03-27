@@ -12,13 +12,23 @@ import {
 } from "@chakra-ui/react";
 import { ApolloContext } from "../context/ApolloContext";
 import { useContext, useEffect, useState } from "react";
+import svgAvatarGenerator from "../components/svgAvatarGenerator";
+import Link from "next/link";
 
 export default function Home() {
 	const [recommendedProfiles, setRecommendedProfiles] = useState([]);
-	const { getRecommendedProfiles } = useContext(ApolloContext);
+	const { getRecommendedProfiles, explorePublications } =
+		useContext(ApolloContext);
+	const [publications, setPublications] = useState([]);
 	useEffect(() => {
 		(async () => {
 			let response = await getRecommendedProfiles();
+			let response2 = await explorePublications();
+			let postPublications =
+				response2.data.explorePublications.items.filter((post) => {
+					return post.__typename == "Post";
+				});
+			setPublications(postPublications);
 			setRecommendedProfiles(response.data.recommendedProfiles);
 		})();
 	}, []);
@@ -39,108 +49,87 @@ export default function Home() {
 					<Sidebar recommendedProfiles={recommendedProfiles} />
 					<VStack padding={5} alignItems="flex-start">
 						<Heading>Discover</Heading>
-						<Grid gridGap={4} templateColumns="repeat(4, 1fr)">
-							<VStack>
-								<Image
-									layout="fill"
-									src="https://static-cdn.jtvnw.net/previews-ttv/live_user_prod-440x248.jpg"
-								/>
-								<HStack
-									justifyContent="flex-start"
-									width="100%"
-								>
-									<Avatar src="https://bit.ly/dan-abramov" />
-									<VStack
-										width="100%"
-										alignItems="flex-start"
-										spacing={0}
-									>
-										<Text>Title</Text>
-										<Text>username</Text>
-									</VStack>
-								</HStack>
-							</VStack>
-							<VStack>
-								<Image
-									layout="fill"
-									src="https://static-cdn.jtvnw.net/previews-ttv/live_user_prod-440x248.jpg"
-								/>
-								<HStack
-									justifyContent="flex-start"
-									width="100%"
-								>
-									<Avatar src="https://bit.ly/dan-abramov" />
-									<VStack
-										width="100%"
-										alignItems="flex-start"
-										spacing={0}
-									>
-										<Text>Title</Text>
-										<Text>username</Text>
-									</VStack>
-								</HStack>
-							</VStack>
-							<VStack>
-								<Image
-									layout="fill"
-									src="https://static-cdn.jtvnw.net/previews-ttv/live_user_prod-440x248.jpg"
-								/>
-								<HStack
-									justifyContent="flex-start"
-									width="100%"
-								>
-									<Avatar src="https://bit.ly/dan-abramov" />
-									<VStack
-										width="100%"
-										alignItems="flex-start"
-										spacing={0}
-									>
-										<Text>Title</Text>
-										<Text>username</Text>
-									</VStack>
-								</HStack>
-							</VStack>
-							<VStack>
-								<Image
-									layout="fill"
-									src="https://static-cdn.jtvnw.net/previews-ttv/live_user_prod-440x248.jpg"
-								/>
-								<HStack
-									justifyContent="flex-start"
-									width="100%"
-								>
-									<Avatar src="https://bit.ly/dan-abramov" />
-									<VStack
-										width="100%"
-										alignItems="flex-start"
-										spacing={0}
-									>
-										<Text>Title</Text>
-										<Text>username</Text>
-									</VStack>
-								</HStack>
-							</VStack>
-							<VStack>
-								<Image
-									layout="fill"
-									src="https://static-cdn.jtvnw.net/previews-ttv/live_user_prod-440x248.jpg"
-								/>
-								<HStack
-									justifyContent="flex-start"
-									width="100%"
-								>
-									<Avatar src="https://bit.ly/dan-abramov" />
-									<VStack
-										width="100%"
-										alignItems="flex-start"
-										spacing={0}
-									>
-										<Text>Title</Text>
-										<Text>username</Text>
-									</VStack>
-								</HStack>
-							</VStack>
-						</Grid>
+						{publications !== null && publications.length > 0 ? (
+							<Grid gridGap={4} templateColumns="repeat(4, 1fr)">
+								{publications.map((publication) => {
+									return (
+										<VStack key={publication.id}>
+											<Link
+												href={`/post/${publication.id}`}
+											>
+												<video
+													src={
+														publication.metadata
+															.media[0].original
+															.url
+													}
+												/>
+											</Link>
+											<HStack
+												justifyContent="flex-start"
+												width="100%"
+												spacing={4}
+											>
+												<Link
+													href={`/user/${publication.profile.id}`}
+												>
+													{publication.profile
+														.picture !== null ? (
+														<Avatar
+															size="sm"
+															outline="3px solid"
+															outlineOffset={2}
+															outlineColor="purple.400"
+															src={
+																publication
+																	.profile
+																	.picture
+																	.original
+																	.url
+															}
+														/>
+													) : (
+														<Avatar
+															backgroundColor="white"
+															bg="transparent"
+															size="sm"
+															outline="3px solid"
+															outlineOffset={2}
+															outlineColor="purple.400"
+															src={svgAvatarGenerator(
+																publication
+																	.profile.id,
+																{
+																	dataUri: true,
+																}
+															)}
+														/>
+													)}
+												</Link>
+												<VStack
+													width="100%"
+													alignItems="flex-start"
+													spacing={0}
+												>
+													<Text>
+														{
+															publication.metadata
+																.name
+														}
+													</Text>
+													<Text>
+														{
+															publication.profile
+																.name
+														}
+													</Text>
+												</VStack>
+											</HStack>
+										</VStack>
+									);
+								})}
+							</Grid>
+						) : null}
 					</VStack>
 				</Grid>
 			</VStack>
