@@ -27,12 +27,19 @@ import Link from "next/link";
 
 export default function Profile() {
 	const { account } = useContext(Web3Context);
-	const { getPublications, getProfilesByProfileIds } =
-		useContext(ApolloContext);
+	const {
+		getPublications,
+		getProfilesByProfileIds,
+		apolloContext,
+		doesFollow,
+	} = useContext(ApolloContext);
+	const { profiles, currentProfile } = apolloContext;
 	const [profile, setProfile] = useState(null);
 	const [posts, setPosts] = useState([]);
 	const [mirrors, setMirrors] = useState([]);
 	const [comments, setComments] = useState([]);
+	const [viewerFollows, setViewerFollows] = useState(null);
+
 	const router = useRouter();
 	const { id } = router.query;
 
@@ -66,6 +73,32 @@ export default function Profile() {
 			setComments(comments);
 		}
 	}, [id]);
+
+	useEffect(() => {
+		if (account !== null && profile != null) {
+			(async () => {
+				let followInfos = [
+					{
+						followerAddress: profile.ownedBy,
+						profileId: profile.id,
+					},
+				];
+				let doesFollowResponse = await doesFollow(followInfos);
+				console.log(doesFollowResponse.data.doesFollow[0].follows);
+				setViewerFollows(doesFollowResponse.data.doesFollow[0].follows);
+			})();
+		}
+	}, [account, profile]);
+
+	async function follow() {
+		let followRequestInfo = {
+			follow: [{ profile: id, followModule: null }],
+		};
+
+		let response = await createFollowTypedData(followRequestInfo);
+		let typedData = response.data.createFollowTypedData.typedData;
+		await followWithSig(typedData);
+	}
 
 	return (
 		<Grid py="74px">
@@ -207,10 +240,12 @@ export default function Profile() {
 										<p>{profile.bio}</p>
 									</VStack>
 								) : null}
-								{account !== null ? (
-									profile.ownedBy.toLowerCase() ===
-									account ? null : (
-										<Button>Follow</Button>
+								{account !== null &&
+								profiles !== null &&
+								currentProfile != null ? (
+									profile.id == profiles[currentProfile].id ||
+									viewerFollows ? null : (
+										<Button onClick={follow}>Follow</Button>
 									)
 								) : null}
 							</VStack>
@@ -382,121 +417,138 @@ export default function Profile() {
 									</TabPanel>
 
 									<TabPanel>
-										{posts && comments.length > 0
-											? comments.map((comment) => {
-													return (
-														<VStack
-															key={comment.id}
-															alignItems="flex-start"
-															border="1px solid var(--chakra-colors-gray-200)"
-															padding={3}
-															spacing={3}
-															borderRadius="10px"
-														>
-															<Text>
-																{`Commented on ${comment.mainPost.profile.name}'s video`}
-															</Text>
-															<HStack spacing={5}>
-																{comment.profile
-																	.picture !==
-																null ? (
-																	<Avatar
-																		size="md"
-																		outline="3px solid"
-																		outlineOffset={
-																			2
-																		}
-																		outlineColor="purple.400"
-																		src={
-																			comment
-																				.profile
-																				.picture
-																				.original
-																				.url
-																		}
-																	/>
-																) : (
-																	<Avatar
-																		backgroundColor="white"
-																		bg="transparent"
-																		size="md"
-																		outline="3px solid"
-																		outlineOffset={
-																			2
-																		}
-																		outlineColor="purple.400"
-																		src={svgAvatarGenerator(
-																			comment
-																				.profile
-																				.id,
-																			{
-																				dataUri: true,
-																			}
-																		)}
-																	/>
-																)}
-																<VStack
-																	spacing={0}
-																	alignItems="flex-start"
-																>
-																	<Text fontWeight="600">
-																		{
-																			comment
-																				.profile
-																				.name
-																		}
-																	</Text>
-																	<Text>
-																		{
-																			comment
-																				.metadata
-																				.content
-																		}
-																	</Text>
-																</VStack>
-															</HStack>
-															<HStack
+										<VStack spacing={5} width="100%">
+											{posts && comments.length > 0
+												? comments.map((comment) => {
+														return (
+															<VStack
+																key={comment.id}
+																alignItems="flex-start"
+																border="1px solid var(--chakra-colors-gray-200)"
+																padding={3}
+																spacing={3}
+																borderRadius="10px"
 																width="100%"
-																justifyContent="center"
-																spacing={5}
 															>
-																<HStack
-																	spacing={2}
+																<Link
+																	href={`/post/${comment.mainPost.id}`}
 																>
-																	<BiComment />
-																	<Text>
-																		{
-																			comment
-																				.stats
-																				.totalAmountOfComments
-																		}
+																	<Text
+																		cursor="pointer"
+																		fontWeight="600"
+																	>
+																		{`Commented on ${comment.mainPost.profile.name}'s video`}
 																	</Text>
-																</HStack>
-																<HStack>
-																	<BsCollection />
-																	<Text>
-																		{
-																			comment
-																				.stats
-																				.totalAmountOfCollects
+																</Link>
+																<HStack
+																	spacing={5}
+																>
+																	{comment
+																		.profile
+																		.picture !==
+																	null ? (
+																		<Avatar
+																			size="md"
+																			outline="3px solid"
+																			outlineOffset={
+																				2
+																			}
+																			outlineColor="purple.400"
+																			src={
+																				comment
+																					.profile
+																					.picture
+																					.original
+																					.url
+																			}
+																		/>
+																	) : (
+																		<Avatar
+																			backgroundColor="white"
+																			bg="transparent"
+																			size="md"
+																			outline="3px solid"
+																			outlineOffset={
+																				2
+																			}
+																			outlineColor="purple.400"
+																			src={svgAvatarGenerator(
+																				comment
+																					.profile
+																					.id,
+																				{
+																					dataUri: true,
+																				}
+																			)}
+																		/>
+																	)}
+																	<VStack
+																		spacing={
+																			0
 																		}
-																	</Text>
+																		alignItems="flex-start"
+																	>
+																		<Text fontWeight="600">
+																			{
+																				comment
+																					.profile
+																					.name
+																			}
+																		</Text>
+																		<Text>
+																			{
+																				comment
+																					.metadata
+																					.content
+																			}
+																		</Text>
+																	</VStack>
 																</HStack>
-																<HStack>
-																	<BiCopy />
-																	<Text>
-																		{
-																			comment
-																				.stats
-																				.totalAmountOfMirrors
+																<HStack
+																	width="100%"
+																	justifyContent="center"
+																	spacing={5}
+																>
+																	<HStack
+																		spacing={
+																			2
 																		}
-																	</Text>
+																	>
+																		<BiComment />
+																		<Text>
+																			{
+																				comment
+																					.stats
+																					.totalAmountOfComments
+																			}
+																		</Text>
+																	</HStack>
+																	<HStack>
+																		<BsCollection />
+																		<Text>
+																			{
+																				comment
+																					.stats
+																					.totalAmountOfCollects
+																			}
+																		</Text>
+																	</HStack>
+																	<HStack>
+																		<BiCopy />
+																		<Text>
+																			{
+																				comment
+																					.stats
+																					.totalAmountOfMirrors
+																			}
+																		</Text>
+																	</HStack>
 																</HStack>
-															</HStack>
-														</VStack>
-													);
-											  })
-											: null}
+															</VStack>
+														);
+												  })
+												: null}
+										</VStack>
 									</TabPanel>
 									<TabPanel>
 										{mirrors && mirrors.length > 0

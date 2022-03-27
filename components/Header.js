@@ -5,6 +5,7 @@ import {
 	Input,
 	InputGroup,
 	InputLeftElement,
+	Image,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { HiOutlineSearch } from "react-icons/hi";
@@ -32,15 +33,14 @@ export default function Header() {
 		>
 			<HStack>
 				<Link href="/">
-					<Text>LensTube</Text>
+					<Image
+						style={{ cursor: "pointer" }}
+						width="200px"
+						src="/LENSTUBE.png"
+					/>
 				</Link>
 			</HStack>
-			<InputGroup maxWidth="500px">
-				<InputLeftElement>
-					<HiOutlineSearch color="var(--chakra-colors-purple-500)" />
-				</InputLeftElement>
-				<Input placeholder="Search Profiles or Videos" />
-			</InputGroup>
+
 			<HStack>
 				{account ? (
 					<HStack>

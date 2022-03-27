@@ -182,12 +182,19 @@ function Video() {
 							</HStack>
 						) : null}
 					</HStack>
-					<VStack width="100%" spacing={5} alignItems="flex-start">
+					<Text>{video.metadata.description}</Text>
+					<VStack
+						border="1px solid var(--chakra-colors-gray-200)"
+						width="100%"
+						padding={5}
+						borderRadius="10px"
+						spacing={5}
+						alignItems="flex-start"
+					>
 						<Heading size="md">Comments</Heading>
 						{account !== null ? (
 							<>
 								<FormControl>
-									<FormLabel>Comment</FormLabel>
 									<Textarea
 										value={comment}
 										onChange={(e) =>
