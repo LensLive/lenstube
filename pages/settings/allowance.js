@@ -49,7 +49,7 @@ export default function Allowance() {
 				setAllowanceData(allowanceData);
 			})();
 		}
-	}, [selectedCurrency]);
+	}, [selectedCurrency, profile]);
 
 	async function generateApprovalModuleData(moduleType, module, value) {
 		let data = {
