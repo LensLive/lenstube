@@ -554,7 +554,7 @@ export default function Profile() {
 										{mirrors && mirrors.length > 0
 											? mirrors.map((mirror) => {
 													return (
-														<span>
+														<span key={mirror.id}>
 															{
 																mirror.metadata
 																	.name
