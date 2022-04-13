@@ -150,7 +150,9 @@ function UploadModal() {
 							profileId: profiles[currentProfile].id,
 							contentURI: `ipfs://${ipfsResult.path}`,
 							collectModule: {
-								emptyCollectModule: true,
+								freeCollectModule: {
+									followerOnly: true,
+								},
 							},
 							referenceModule: {
 								followerOnlyReferenceModule: false,
@@ -175,7 +177,7 @@ function UploadModal() {
 						const { v, r, s } = splitSignature(signature);
 						const signer = await wallet.getSigner();
 						const lensHub = new ethers.Contract(
-							"0xd7B3481De00995046C7850bCe9a5196B7605c367",
+							"0x4BF0c7AD32Fd2d32089790a54485e23f5C7736C0",
 							LENS_HUB_ABI,
 							signer
 						);
@@ -217,23 +219,23 @@ function UploadModal() {
 	return (
 		<Modal isOpen={isUploadModalOpen} onClose={uploadModalOnClose}>
 			<ModalOverlay />
-			<ModalContent alignItems="center">
+			<ModalContent alignItems='center'>
 				<ModalHeader>Upload Video</ModalHeader>
-				<ModalBody width="100%">
+				<ModalBody width='100%'>
 					<VStack spacing={4}>
 						<FormControl>
-							<FormLabel htmlFor="title">Video Title</FormLabel>
+							<FormLabel htmlFor='title'>Video Title</FormLabel>
 							<Input
 								value={videoTitle}
 								onChange={(e) =>
 									handleChange(e.target, setVideoTitle)
 								}
-								id="title"
-								placeholder="Video Title"
+								id='title'
+								placeholder='Video Title'
 							/>
 						</FormControl>
 						<FormControl>
-							<FormLabel htmlFor="description">
+							<FormLabel htmlFor='description'>
 								Video Title
 							</FormLabel>
 							<Textarea
@@ -241,8 +243,8 @@ function UploadModal() {
 								onChange={(e) =>
 									handleChange(e.target, setDescription)
 								}
-								id="description"
-								placeholder="Video Description"
+								id='description'
+								placeholder='Video Description'
 							/>
 						</FormControl>
 						<FormControl>
@@ -252,29 +254,27 @@ function UploadModal() {
 									: videoFileName}
 							</span>
 							<FormLabel
-								background="purple.400"
-								rounded="md"
-								color="white"
+								background='purple.400'
+								rounded='md'
+								color='white'
 								padding={2}
-								textAlign="center"
-								htmlFor="file"
-							>
+								textAlign='center'
+								htmlFor='file'>
 								Upload File
 							</FormLabel>
 							<Input
 								onChange={(e) =>
 									handleFileChange(e.target, setVideoFile)
 								}
-								display="none"
-								id="file"
-								type="file"
-								accept="video/mp4"
+								display='none'
+								id='file'
+								type='file'
+								accept='video/mp4'
 							/>
 						</FormControl>
 						<Button
 							onClick={handleFileUpload}
-							isLoading={videoUploading}
-						>
+							isLoading={videoUploading}>
 							Upload
 						</Button>
 					</VStack>

@@ -9,6 +9,7 @@ import {
 	Text,
 	Heading,
 	Avatar,
+	Box,
 } from "@chakra-ui/react";
 import { ApolloContext } from "../../context/ApolloContext";
 import { useEffect, useState, useContext } from "react";
@@ -154,25 +155,41 @@ function Video() {
 	}
 
 	return (
-		<Grid gridGap="50px" templateColumns="4fr 2fr" padding={5} py="100px">
+		<Grid gridGap='50px' templateColumns='4fr 2fr' padding={5} py='100px'>
 			{video !== null ? (
-				<VStack alignItems="flex-start" spacing={4}>
-					<video
-						src={video.metadata.media[0].original.url}
-						autoPlay={true}
-						width="100%"
-						controls={true}
-					/>
-					<HStack width="100%" justifyContent="space-between">
-						<VStack alignItems="flex-start">
-							<Heading size="lg">{video.metadata.name}</Heading>
-							<Heading size="md">{video.profile.name}</Heading>
+				<VStack alignItems='flex-start' spacing={4}>
+					<Box
+						style={{
+							width: "100%",
+							paddingTop: "56.25%",
+							height: "0",
+							position: "relative",
+							background: "black",
+						}}>
+						<video
+							src={video.metadata.media[0].original.url}
+							autoPlay={true}
+							width='100%'
+							controls={true}
+							style={{
+								width: "100%",
+								height: "100%",
+								position: "absolute",
+								top: "0",
+								left: "0",
+							}}
+						/>
+					</Box>
+					<HStack width='100%' justifyContent='space-between'>
+						<VStack alignItems='flex-start'>
+							<Heading size='lg'>{video.metadata.name}</Heading>
+							<Heading size='md'>{video.profile.name}</Heading>
 						</VStack>
 						{account !== null ? (
 							<HStack>
 								{hasCollectedPub !== null &&
 								!hasCollectedPub ? (
-									<Button variant="ghost" onClick={collect}>
+									<Button variant='ghost' onClick={collect}>
 										Collect
 									</Button>
 								) : null}
@@ -184,14 +201,13 @@ function Video() {
 					</HStack>
 					<Text>{video.metadata.description}</Text>
 					<VStack
-						border="1px solid var(--chakra-colors-gray-200)"
-						width="100%"
+						border='1px solid var(--chakra-colors-gray-200)'
+						width='100%'
 						padding={5}
-						borderRadius="10px"
+						borderRadius='10px'
 						spacing={5}
-						alignItems="flex-start"
-					>
-						<Heading size="md">Comments</Heading>
+						alignItems='flex-start'>
+						<Heading size='md'>Comments</Heading>
 						{account !== null ? (
 							<>
 								<FormControl>
@@ -200,7 +216,7 @@ function Video() {
 										onChange={(e) =>
 											setComment(e.target.value)
 										}
-										placeholder="Comment"
+										placeholder='Comment'
 									/>
 								</FormControl>
 								<Button onClick={createCommentData}>
@@ -210,22 +226,21 @@ function Video() {
 						) : null}
 
 						{comments !== null ? (
-							<VStack alignItems="flex-start" spacing={5}>
+							<VStack alignItems='flex-start' spacing={5}>
 								{comments.length > 0
 									? comments.map((comment) => {
 											return (
 												<HStack
 													spacing={5}
-													alignItems="flex-start"
-													key={comment.id}
-												>
+													alignItems='flex-start'
+													key={comment.id}>
 													{comment.profile.picture !==
 													null ? (
 														<Avatar
-															size="md"
-															outline="3px solid"
+															size='md'
+															outline='3px solid'
 															outlineOffset={2}
-															outlineColor="purple.400"
+															outlineColor='purple.400'
 															src={
 																comment.profile
 																	.picture
@@ -235,12 +250,12 @@ function Video() {
 														/>
 													) : (
 														<Avatar
-															backgroundColor="white"
-															bg="transparent"
-															size="md"
-															outline="3px solid"
+															backgroundColor='white'
+															bg='transparent'
+															size='md'
+															outline='3px solid'
 															outlineOffset={2}
-															outlineColor="purple.400"
+															outlineColor='purple.400'
 															src={svgAvatarGenerator(
 																comment.profile
 																	.id,
@@ -252,9 +267,8 @@ function Video() {
 													)}
 													<VStack
 														spacing={0}
-														alignItems="flex-start"
-													>
-														<Text fontWeight="600">
+														alignItems='flex-start'>
+														<Text fontWeight='600'>
 															{
 																comment.profile
 																	.name
@@ -276,36 +290,39 @@ function Video() {
 					</VStack>
 				</VStack>
 			) : null}
-			<VStack alignItems="flex-start" justifyContent="flex-start">
-				<Text alignSelf="flex-start">You Might Also Like...</Text>
+			<VStack alignItems='flex-start' justifyContent='flex-start'>
+				<Text alignSelf='flex-start'>You Might Also Like...</Text>
 				{videos !== null && videos.length > 0
 					? videos.map((videoObj) => {
 							return (
-								<HStack key={videoObj.id}>
+								<HStack
+									alignItems='flex-start'
+									key={videoObj.id}>
 									<Link href={`/post/${videoObj.id}`}>
 										<video
-											width="220px"
 											src={
 												videoObj.metadata.media[0]
 													.original.url
 											}
+											style={{
+												width: "200px",
+												height: "100%",
+											}}
 										/>
 									</Link>
 									<VStack
-										justifyContent="flex-start"
-										alignItems="flex-start"
-										width="100%"
-										height="100%"
-									>
+										justifyContent='flex-start'
+										alignItems='flex-start'
+										width='100%'
+										height='100%'>
 										<Text>{videoObj.metadata.name}</Text>
-										<Text fontWeight="600">
+										<Text fontWeight='600'>
 											{videoObj.profile.name}
 										</Text>
 										<HStack
-											width="100%"
-											justifyContent="center"
-											spacing={5}
-										>
+											width='100%'
+											justifyContent='center'
+											spacing={5}>
 											<HStack spacing={2}>
 												<BiComment />
 												<Text>

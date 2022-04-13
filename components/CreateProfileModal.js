@@ -39,15 +39,21 @@ function CreateProfileModal() {
 	const [followPfp, setFollowPfp] = useState("");
 
 	useEffect(() => {
-		if (profiles !== undefined && profiles.length > 0) {
+		if (account !== null) {
+			console.log(account);
 			(async () => {
-				let response = await getEnabledCurrencies();
 				let response2 = await getEnabledModules();
 				setEnabledModules(response2.data.enabledModules);
-				setEnabledCurrencies(response.data.enabledModuleCurrencies);
 			})();
 		}
-	}, [profiles]);
+	}, [account]);
+
+	useEffect(async () => {
+		if (enabledModules) {
+			let response = await getEnabledCurrencies();
+			setEnabledCurrencies(response.data.enabledModuleCurrencies);
+		}
+	}, [enabledModules]);
 
 	function handleChange(target, setter) {
 		setter(target.value);
@@ -69,7 +75,7 @@ function CreateProfileModal() {
 								recipient: feeRecipient,
 							},
 					  }
-					: { emptyFollowModule: true },
+					: { freeFollowModule: true },
 		};
 		let response = await createProfile(createProfileRequestObj);
 		onClose();
@@ -88,37 +94,36 @@ function CreateProfileModal() {
 						: false
 					: false
 			}
-			onClose={onClose}
-		>
+			onClose={onClose}>
 			<ModalOverlay />
-			<ModalContent alignItems="center">
+			<ModalContent alignItems='center'>
 				<ModalHeader>Create Profile</ModalHeader>
-				<ModalBody width="100%">
-					<VStack width="100%">
-						<FormControl width="100%">
-							<FormLabel htmlFor="handle">Handle</FormLabel>
+				<ModalBody width='100%'>
+					<VStack width='100%'>
+						<FormControl width='100%'>
+							<FormLabel htmlFor='handle'>Handle</FormLabel>
 							<Input
-								id="handle"
+								id='handle'
 								value={handle}
 								onChange={(e) =>
 									handleChange(e.target, setHandle)
 								}
-								placeholder="handle"
+								placeholder='handle'
 							/>
 						</FormControl>
-						<FormControl width="100%">
-							<FormLabel htmlFor="pfp">
+						<FormControl width='100%'>
+							<FormLabel htmlFor='pfp'>
 								Profile Picture URI
 							</FormLabel>
 							<Input
 								value={pfp}
 								onChange={(e) => handleChange(e.target, setPfp)}
-								id="pfp"
-								placeholder="profile picture"
+								id='pfp'
+								placeholder='profile picture'
 							/>
 						</FormControl>
-						<FormControl width="100%">
-							<FormLabel htmlFor="follow">
+						<FormControl width='100%'>
+							<FormLabel htmlFor='follow'>
 								Follow NFT URI
 							</FormLabel>
 							<Input
@@ -126,35 +131,33 @@ function CreateProfileModal() {
 								onChange={(e) =>
 									handleChange(e.target, setFollowPfp)
 								}
-								id="follow"
-								placeholder="follow nft"
+								id='follow'
+								placeholder='follow nft'
 							/>
 						</FormControl>
-						<FormControl width="100%">
-							<FormLabel htmlFor="followModule">
+						<FormControl width='100%'>
+							<FormLabel htmlFor='followModule'>
 								Follow Module
 							</FormLabel>
 							{enabledModules !== null ? (
 								<Select
-									id="followModule"
+									id='followModule'
 									onChange={(e) =>
 										handleChange(
 											e.target,
 											setSelectedFollowModule
 										)
 									}
-									placeholder=" Select Follow Module"
-								>
-									<option value="EmptyFollowModule">
-										EmptyFollowModule
+									placeholder=' Select Follow Module'>
+									<option value='FreeFollowModule'>
+										FreeFollowModule
 									</option>
 									{enabledModules.followModules.map(
 										(module) => {
 											return (
 												<option
 													key={module.moduleName}
-													value={module.moduleName}
-												>
+													value={module.moduleName}>
 													{module.moduleName}
 												</option>
 											);
@@ -166,21 +169,20 @@ function CreateProfileModal() {
 						{selectedFollowModule == "FeeFollowModule" ? (
 							<>
 								<FormControl>
-									<FormLabel htmlFor="currency">
+									<FormLabel htmlFor='currency'>
 										{" "}
 										Select Currency
 									</FormLabel>
 									{enabledCurrencies ? (
 										<Select
-											placeholder="Select Currency"
-											id="currency"
+											placeholder='Select Currency'
+											id='currency'
 											onChange={(e) =>
 												handleChange(
 													e.target,
 													setSelectedCurrency
 												)
-											}
-										>
+											}>
 											{enabledCurrencies.map(
 												(currency) => {
 													return (
@@ -188,8 +190,7 @@ function CreateProfileModal() {
 															key={currency.name}
 															value={
 																currency.address
-															}
-														>
+															}>
 															{currency.name}
 														</option>
 													);
@@ -205,7 +206,7 @@ function CreateProfileModal() {
 										onChange={(e) =>
 											handleChange(e.target, setFeeValue)
 										}
-										placeholder="value"
+										placeholder='value'
 									/>
 								</FormControl>
 								<FormControl>
@@ -218,7 +219,7 @@ function CreateProfileModal() {
 												setFeeRecipient
 											)
 										}
-										placeholder="recipient"
+										placeholder='recipient'
 									/>
 								</FormControl>
 							</>

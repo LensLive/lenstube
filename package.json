@@ -23,6 +23,7 @@
     "graphql": "^16.3.0",
     "ipfs-http-client": "^56.0.1",
     "next": "12.1.0",
+    "nft.storage": "^6.1.0",
     "omit-deep": "^0.3.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",

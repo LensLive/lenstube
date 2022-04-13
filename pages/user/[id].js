@@ -101,14 +101,14 @@ export default function Profile() {
 	}
 
 	return (
-		<Grid py="74px">
+		<Grid py='74px'>
 			{profile != null ? (
 				<VStack spacing={0}>
-					<Box height="250px" overflow="hidden" width="100%">
+					<Box height='250px' overflow='hidden' width='100%'>
 						<Image
-							height="100%"
-							width="100%"
-							objectFit="cover"
+							height='100%'
+							width='100%'
+							objectFit='cover'
 							src={
 								profile.coverPicture
 									? profile.coverPicture.original.url
@@ -117,95 +117,88 @@ export default function Profile() {
 						/>
 					</Box>
 					<Grid
-						width="100%"
+						width='100%'
 						padding={5}
 						gridGap={5}
-						templateColumns="1fr 4fr"
-					>
+						templateColumns='1fr 4fr'>
 						<VStack
-							width="100%"
-							alignItems="flex-start"
-							position="relative"
+							width='100%'
+							alignItems='flex-start'
+							position='relative'
 							padding={5}
-							maxHeight="1000px"
+							maxHeight='1000px'
 							style={{
 								border: "1px solid var(--chakra-colors-gray-200)",
 								padding: "20px",
 								borderRadius: "5px",
 								width: "100%",
-							}}
-						>
+							}}>
 							{profile.picture ? (
 								<Avatar
-									size="2xl"
-									position="absolute"
-									top="-60px"
-									outline="3px solid"
+									size='2xl'
+									position='absolute'
+									top='-60px'
+									outline='3px solid'
 									outlineOffset={2}
-									outlineColor="purple.400"
+									outlineColor='purple.400'
 									src={profile.picture.original.url}
 								/>
 							) : (
 								<Avatar
-									backgroundColor="white"
-									bg="transparent"
-									size="2xl"
-									position="absolute"
-									top="-60px"
-									outline="3px solid"
+									backgroundColor='white'
+									bg='transparent'
+									size='2xl'
+									position='absolute'
+									top='-60px'
+									outline='3px solid'
 									outlineOffset={2}
-									outlineColor="purple.400"
+									outlineColor='purple.400'
 									src={svgAvatarGenerator(profile.id, {
 										dataUri: true,
 									})}
 								/>
 							)}
 							<VStack
-								pt="60px"
-								alignItems="flex-start"
-								width="100%"
-							>
+								pt='60px'
+								alignItems='flex-start'
+								width='100%'>
 								<Tag
-									size="40px"
+									size='40px'
 									padding={0}
-									borderRadius="20px"
-								>
+									borderRadius='20px'>
 									<span style={{ margin: "4px 10px" }}>
 										#{profile.id}
 									</span>
 									<Tag
-										size="30px"
-										borderRadius="20px"
-										colorScheme="pink"
-										height="100%"
-										padding="4px 10px"
-									>
+										size='30px'
+										borderRadius='20px'
+										colorScheme='pink'
+										height='100%'
+										padding='4px 10px'>
 										{`${profile.ownedBy.substr(
 											0,
 											5
 										)}...${profile.ownedBy.substr(-5)}`}
 									</Tag>
 								</Tag>
-								<Text fontSize="2xl" fontWeight="600">
+								<Text fontSize='2xl' fontWeight='600'>
 									{profile.name}
 								</Text>
 								<Text>@{profile.handle}</Text>
 								<HStack spacing={5}>
 									<VStack
 										spacing={0}
-										width="100%"
-										alignItems="flex-start"
-									>
+										width='100%'
+										alignItems='flex-start'>
 										<span>
 											{profile.stats.totalFollowing}
 										</span>
 										<span>Following</span>
 									</VStack>
 									<VStack
-										width="100%"
+										width='100%'
 										spacing={0}
-										alignItems="flex-start"
-									>
+										alignItems='flex-start'>
 										<span>
 											{profile.stats.totalFollowers}
 										</span>
@@ -235,7 +228,7 @@ export default function Profile() {
 									<Tag>{profile.website}</Tag>
 								) : null}
 								{profile.bio ? (
-									<VStack alignItems="flex-start">
+									<VStack alignItems='flex-start'>
 										<span>Bio</span>
 										<p>{profile.bio}</p>
 									</VStack>
@@ -257,13 +250,11 @@ export default function Profile() {
 								borderRadius: "5px",
 								width: "100%",
 							}}
-							width="100%"
-						>
+							width='100%'>
 							<Tabs
-								width="100%"
-								variant="soft-rounded"
-								colorScheme="purple"
-							>
+								width='100%'
+								variant='soft-rounded'
+								colorScheme='purple'>
 								<TabList>
 									<Tab>Posts</Tab>
 									<Tab>Comments</Tab>
@@ -272,35 +263,32 @@ export default function Profile() {
 								<TabPanels>
 									<TabPanel>
 										{posts && posts.length > 0 ? (
-											<Grid templateColumns="repeat(3, 1fr)">
+											<Grid templateColumns='repeat(3, 1fr)'>
 												{posts.map((post) => {
 													return (
 														<Link
 															key={post.id}
-															href={`/post/${post.id}`}
-														>
+															href={`/post/${post.id}`}>
 															<VStack
-																width="100%"
-																border="1px solid var(--chakra-colors-gray-200)"
-																borderRadius="10px"
-																padding="20px"
+																width='100%'
+																border='1px solid var(--chakra-colors-gray-200)'
+																borderRadius='10px'
+																padding='20px'
 																spacing={4}
-																alignItems="flex-start"
-															>
+																alignItems='flex-start'>
 																<HStack
-																	spacing={4}
-																>
+																	spacing={4}>
 																	{post
 																		.profile
 																		.picture !==
 																	null ? (
 																		<Avatar
-																			size="sm"
-																			outline="3px solid"
+																			size='sm'
+																			outline='3px solid'
 																			outlineOffset={
 																				2
 																			}
-																			outlineColor="purple.400"
+																			outlineColor='purple.400'
 																			src={
 																				post
 																					.profile
@@ -311,14 +299,14 @@ export default function Profile() {
 																		/>
 																	) : (
 																		<Avatar
-																			backgroundColor="white"
-																			bg="transparent"
-																			size="sm"
-																			outline="3px solid"
+																			backgroundColor='white'
+																			bg='transparent'
+																			size='sm'
+																			outline='3px solid'
 																			outlineOffset={
 																				2
 																			}
-																			outlineColor="purple.400"
+																			outlineColor='purple.400'
 																			src={svgAvatarGenerator(
 																				post
 																					.profile
@@ -338,9 +326,8 @@ export default function Profile() {
 																	</Text>
 																</HStack>
 																<HStack
-																	justifyContent="flex-start"
-																	width="100%"
-																>
+																	justifyContent='flex-start'
+																	width='100%'>
 																	<Text>
 																		{
 																			post
@@ -363,21 +350,15 @@ export default function Profile() {
 																			.original
 																			.url
 																	}
-																	autoPlay={
-																		true
-																	}
-																	loop={true}
 																/>
 																<HStack
-																	width="100%"
-																	justifyContent="center"
-																	spacing={5}
-																>
+																	width='100%'
+																	justifyContent='center'
+																	spacing={5}>
 																	<HStack
 																		spacing={
 																			2
-																		}
-																	>
+																		}>
 																		<BiComment />
 																		<Text>
 																			{
@@ -417,43 +398,39 @@ export default function Profile() {
 									</TabPanel>
 
 									<TabPanel>
-										<VStack spacing={5} width="100%">
+										<VStack spacing={5} width='100%'>
 											{posts && comments.length > 0
 												? comments.map((comment) => {
 														return (
 															<VStack
 																key={comment.id}
-																alignItems="flex-start"
-																border="1px solid var(--chakra-colors-gray-200)"
+																alignItems='flex-start'
+																border='1px solid var(--chakra-colors-gray-200)'
 																padding={3}
 																spacing={3}
-																borderRadius="10px"
-																width="100%"
-															>
+																borderRadius='10px'
+																width='100%'>
 																<Link
-																	href={`/post/${comment.mainPost.id}`}
-																>
+																	href={`/post/${comment.mainPost.id}`}>
 																	<Text
-																		cursor="pointer"
-																		fontWeight="600"
-																	>
+																		cursor='pointer'
+																		fontWeight='600'>
 																		{`Commented on ${comment.mainPost.profile.name}'s video`}
 																	</Text>
 																</Link>
 																<HStack
-																	spacing={5}
-																>
+																	spacing={5}>
 																	{comment
 																		.profile
 																		.picture !==
 																	null ? (
 																		<Avatar
-																			size="md"
-																			outline="3px solid"
+																			size='md'
+																			outline='3px solid'
 																			outlineOffset={
 																				2
 																			}
-																			outlineColor="purple.400"
+																			outlineColor='purple.400'
 																			src={
 																				comment
 																					.profile
@@ -464,14 +441,14 @@ export default function Profile() {
 																		/>
 																	) : (
 																		<Avatar
-																			backgroundColor="white"
-																			bg="transparent"
-																			size="md"
-																			outline="3px solid"
+																			backgroundColor='white'
+																			bg='transparent'
+																			size='md'
+																			outline='3px solid'
 																			outlineOffset={
 																				2
 																			}
-																			outlineColor="purple.400"
+																			outlineColor='purple.400'
 																			src={svgAvatarGenerator(
 																				comment
 																					.profile
@@ -486,9 +463,8 @@ export default function Profile() {
 																		spacing={
 																			0
 																		}
-																		alignItems="flex-start"
-																	>
-																		<Text fontWeight="600">
+																		alignItems='flex-start'>
+																		<Text fontWeight='600'>
 																			{
 																				comment
 																					.profile
@@ -505,15 +481,13 @@ export default function Profile() {
 																	</VStack>
 																</HStack>
 																<HStack
-																	width="100%"
-																	justifyContent="center"
-																	spacing={5}
-																>
+																	width='100%'
+																	justifyContent='center'
+																	spacing={5}>
 																	<HStack
 																		spacing={
 																			2
-																		}
-																	>
+																		}>
 																		<BiComment />
 																		<Text>
 																			{

@@ -408,7 +408,7 @@ const GET_PUBLICATIONS = `
 
   fragment CollectModuleFields on CollectModule {
     __typename
-    ... on EmptyCollectModuleSettings {
+    ... on FreeCollectModuleSettings {
       type
     }
     ... on FeeCollectModuleSettings {
@@ -934,7 +934,7 @@ const EXPLORE_PUBLICATIONS = `
 
   fragment CollectModuleFields on CollectModule {
     __typename
-    ... on EmptyCollectModuleSettings {
+    ... on FreeCollectModuleSettings {
       type
     }
     ... on FeeCollectModuleSettings {
@@ -1360,7 +1360,7 @@ const GET_PUBLICATION = `
 
   fragment CollectModuleFields on CollectModule {
     __typename
-    ... on EmptyCollectModuleSettings {
+    ... on FreeCollectModuleSettings {
       type
     }
     ... on FeeCollectModuleSettings {
@@ -1640,7 +1640,7 @@ const CREATE_COLLECT_TYPED_DATA = `
 function ApolloContextProvider({ children }) {
 	const { wallet, account } = useContext(Web3Context);
 	const [apolloContext, dispatch] = useReducer(apolloReducer, {});
-
+	console.log("apollo client setup!");
 	const apolloClient = new ApolloClient({
 		link: authLink.concat(httpLink),
 		cache: new InMemoryCache(),
@@ -1658,6 +1658,7 @@ function ApolloContextProvider({ children }) {
 
 	useEffect(() => {
 		if (wallet !== null && account !== null && account !== undefined) {
+			console.log("connecting");
 			getProfilesByAccount();
 		}
 	}, [account]);
@@ -1726,6 +1727,7 @@ function ApolloContextProvider({ children }) {
 
 	async function login() {
 		let authenticationToken = localStorage.getItem("lensAPIAccessToken");
+		console.log(authenticationToken);
 		if (authenticationToken) {
 			let isAuthenticated = (await verify(authenticationToken)).data
 				.verify;
@@ -1842,14 +1844,14 @@ function ApolloContextProvider({ children }) {
 	}
 
 	async function enabledCurrencies() {
-		// await login(account);
+		await login(account);
 		return apolloClient.query({
 			query: gql(ENABLED_CURRENCIES),
 		});
 	}
 
 	async function enabledModules() {
-		// await login(account);
+		await login(account);
 		return apolloClient.query({
 			query: gql(ENABLED_MODULES),
 		});
@@ -2168,8 +2170,7 @@ function ApolloContextProvider({ children }) {
 				hasCollected,
 				collectWithSig,
 				createCollectTypedData,
-			}}
-		>
+			}}>
 			{children}
 		</ApolloContext.Provider>
 	);

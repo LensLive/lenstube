@@ -35,7 +35,7 @@ export default function Allowance() {
 						"FeeCollectModule",
 						"LimitedTimedFeeCollectModule",
 						"TimedFeeCollectModule",
-						"EmptyCollectModule",
+						"FreeCollectModule",
 						"RevertCollectModule",
 					],
 					followModules: ["FeeFollowModule"],
@@ -49,7 +49,7 @@ export default function Allowance() {
 				setAllowanceData(allowanceData);
 			})();
 		}
-	}, [selectedCurrency, profile]);
+	}, [selectedCurrency]);
 
 	async function generateApprovalModuleData(moduleType, module, value) {
 		let data = {
@@ -79,24 +79,21 @@ export default function Allowance() {
 					padding: "20px",
 					borderRadius: "5px",
 					width: "100%",
-				}}
-			>
+				}}>
 				<VStack spacing={2}>
-					<VStack spacing={2} width="100%" alignItems="flex-start">
+					<VStack spacing={2} width='100%' alignItems='flex-start'>
 						<h1>Currencies</h1>
 						{enabledCurrencies !== null ? (
 							<Select
 								onChange={(e) =>
 									setSelectedCurrency(e.target.value)
 								}
-								placeholder="Select Currency"
-							>
+								placeholder='Select Currency'>
 								{enabledCurrencies.map((currency) => {
 									return (
 										<option
 											key={currency.name}
-											value={currency.address}
-										>
+											value={currency.address}>
 											{currency.name} ({currency.symbol})
 										</option>
 									);
@@ -115,18 +112,16 @@ export default function Allowance() {
 									width: "100%",
 								}}
 								spacing={3}
-								alignItems="flex-start"
-							>
+								alignItems='flex-start'>
 								<h2>Follow Modules</h2>
 								{enabledModules !== null
 									? enabledModules.followModules.map(
 											(module) => {
 												return (
 													<HStack
-														width="100%"
-														justifyContent="space-between"
-														key={module.moduleName}
-													>
+														width='100%'
+														justifyContent='space-between'
+														key={module.moduleName}>
 														<h2>
 															{module.moduleName}
 														</h2>
@@ -141,8 +136,7 @@ export default function Allowance() {
 																		0
 																	)
 																}
-																variant="ghost"
-															>
+																variant='ghost'>
 																Disallow
 															</Button>
 														) : (
@@ -153,8 +147,7 @@ export default function Allowance() {
 																		module.moduleName,
 																		10
 																	)
-																}
-															>
+																}>
 																Allow
 															</Button>
 														)}
@@ -172,18 +165,16 @@ export default function Allowance() {
 									width: "100%",
 								}}
 								spacing={3}
-								alignItems="flex-start"
-							>
+								alignItems='flex-start'>
 								<h2>Collect Modules</h2>
 								{enabledModules !== null
 									? enabledModules.collectModules.map(
 											(module) => {
 												return (
 													<HStack
-														width="100%"
-														justifyContent="space-between"
-														key={module.moduleName}
-													>
+														width='100%'
+														justifyContent='space-between'
+														key={module.moduleName}>
 														<h2>
 															{module.moduleName}
 														</h2>
@@ -198,8 +189,7 @@ export default function Allowance() {
 																		0
 																	)
 																}
-																variant="ghost"
-															>
+																variant='ghost'>
 																Disallow
 															</Button>
 														) : (
@@ -210,8 +200,7 @@ export default function Allowance() {
 																		module.moduleName,
 																		10
 																	)
-																}
-															>
+																}>
 																Allow
 															</Button>
 														)}
@@ -229,18 +218,16 @@ export default function Allowance() {
 									width: "100%",
 								}}
 								spacing={3}
-								alignItems="flex-start"
-							>
+								alignItems='flex-start'>
 								<h2>Reference Modules</h2>
 								{enabledModules !== null
 									? enabledModules.referenceModules.map(
 											(module) => {
 												return (
 													<HStack
-														width="100%"
-														justifyContent="space-between"
-														key={module.moduleName}
-													>
+														width='100%'
+														justifyContent='space-between'
+														key={module.moduleName}>
 														<h2>
 															{module.moduleName}
 														</h2>
@@ -255,8 +242,7 @@ export default function Allowance() {
 																		0
 																	)
 																}
-																variant="ghost"
-															>
+																variant='ghost'>
 																Disallow
 															</Button>
 														) : (
@@ -267,8 +253,7 @@ export default function Allowance() {
 																		module.moduleName,
 																		10
 																	)
-																}
-															>
+																}>
 																Allow
 															</Button>
 														)}
